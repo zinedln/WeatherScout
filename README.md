@@ -1,1 +1,1 @@
-# Open-Weather-Maps
+# WeatherScout
