@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TextField?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.weatherscout.HelloController">
+<VBox alignment="CENTER" prefHeight="400.0" prefWidth="400.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.weatherscout.HelloController">
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-
-    <TextField fx:id="cityInput"/>
-    <Button text="Click HERE to check the weather!" onAction="#onHelloButtonClick"/>
-    <Label fx:id="welcomeText"/>
-    <Label fx:id="humidity"/>
-    <Label fx:id="temperature"/>
+   <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+      <children>
+      
+          <TextField fx:id="cityInput" onAction="#onHelloButtonClick" prefHeight="26.0" prefWidth="285.0" promptText="Land oder Stadt" />
+          <Button onAction="#onHelloButtonClick" text="Suchen" />
+      </children>
+   </HBox>
+    <Label fx:id="welcomeText" />
+    <Label fx:id="temperature" />
+    <Label fx:id="humidity" />
 </VBox>

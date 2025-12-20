@@ -18,9 +18,11 @@ public class HelloController {
     @FXML
     protected void onHelloButtonClick() {
         String city = cityInput.getText();
-        welcomeText.setText("Checking the weather for: " + city);
+        welcomeText.setText("Wie ist das Wetter in " + city + "?");
 
-        temperature.setText("The temperature is: " + temperature.getText() + "°C");
-        humidity.setText("The humidity is: " + humidity.getText() + "%");
+        temperature.setText("Die Temperatur beträgt " + "25" + "°C");
+        humidity.setText("Die Luftfeuchtigkeit liegt bei " + "60" + "%.");
+
+        // Note to myself: cases for specific degrees (don't forget your coat, etc.)
     }
 }
