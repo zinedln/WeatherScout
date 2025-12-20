@@ -17,12 +17,27 @@ public class HelloController {
 
     @FXML
     protected void onHelloButtonClick() {
-        String city = cityInput.getText();
-        welcomeText.setText("Wie ist das Wetter in " + city + "?");
+        String city = cityInput.getText().trim();
 
-        temperature.setText("Die Temperatur beträgt " + "25" + "°C");
-        humidity.setText("Die Luftfeuchtigkeit liegt bei " + "60" + "%.");
+        if (city.matches("[a-zA-Z]+")) {
+            String formattedCity = city.substring(0, 1).toUpperCase() + city.substring(1).toLowerCase();
 
+            cityInput.setStyle(null);
+            welcomeText.setStyle(null);
+
+            welcomeText.setText("Wie ist das Wetter in " + formattedCity + "?");
+            temperature.setText("Die Temperatur beträgt " + "25" + "°C");
+            humidity.setText("Die Luftfeuchtigkeit liegt bei " + "60" + "%.");
+        }
+        else {
+            welcomeText.setText("Achtung! Es sind nur Buchstaben erlaubt!");
+            welcomeText.setStyle("-fx-text-fill: red;");
+
+            cityInput.setStyle("-fx-text-fill: red; -fx-border-color: red;");
+
+            temperature.setText("");
+            humidity.setText("");
+        }
         // Note to myself: cases for specific degrees (don't forget your coat, etc.)
     }
 }
