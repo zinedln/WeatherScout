@@ -7,19 +7,32 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" prefHeight="400.0" prefWidth="400.0" spacing="20.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.weatherscout.HelloController">
+<VBox alignment="CENTER" prefHeight="450.0" prefWidth="400.0" spacing="25.0"
+      stylesheets="@styles.css"
+      xmlns="http://javafx.com/javafx/24.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.weatherscout.HelloController">
     <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+        <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
     </padding>
-   <HBox alignment="TOP_CENTER" prefHeight="100.0" prefWidth="200.0" spacing="5.0">
-      <children>
-      
-          <TextField fx:id="cityInput" onAction="#onHelloButtonClick" prefHeight="26.0" prefWidth="285.0" promptText="Land oder Stadt" />
-          <Button onAction="#onHelloButtonClick" text="Suchen" />
-      </children>
-   </HBox>
-    <Label fx:id="welcomeText" />
-    <Label fx:id="temperature" />
-    <Label fx:id="humidity" />
-    <Label fx:id="clothingTip" wrapText="true" textAlignment="CENTER" />
+
+    <Label text="☀️ WeatherScout" styleClass="title-label" />
+
+    <HBox alignment="CENTER" spacing="10.0">
+        <TextField fx:id="cityInput"
+                   onAction="#onHelloButtonClick"
+                   prefWidth="250.0"
+                   promptText="Stadt eingeben..."
+                   styleClass="search-field" />
+        <Button onAction="#onHelloButtonClick"
+                text="🔍 Suchen"
+                styleClass="search-button" />
+    </HBox>
+
+    <VBox alignment="CENTER" spacing="10.0">
+        <Label fx:id="welcomeText" styleClass="info-label" />
+        <Label fx:id="temperature" styleClass="info-label" />
+        <Label fx:id="humidity" styleClass="info-label" />
+        <Label fx:id="clothingTip" styleClass="tip-label" wrapText="true" textAlignment="CENTER" />
+    </VBox>
 </VBox>

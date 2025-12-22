@@ -1,0 +1,40 @@
+.root {
+    -fx-background-color: linear-gradient(to bottom, #87CEEB, #4682B4);
+    -fx-font-family: "Arial";
+}
+
+.title-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.info-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: white;
+}
+
+.tip-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #FFD700;
+    -fx-font-weight: bold;
+}
+
+.search-field {
+    -fx-font-size: 14px;
+    -fx-background-radius: 20;
+    -fx-padding: 10;
+}
+
+.search-button {
+    -fx-font-size: 14px;
+    -fx-background-color: #FF6B35;
+    -fx-text-fill: white;
+    -fx-background-radius: 20;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.search-button:hover {
+    -fx-background-color: #FF8C5A;
+}
