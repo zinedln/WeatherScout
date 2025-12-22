@@ -3,7 +3,10 @@ package org.example.weatherscout;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+
+import java.util.List;
 
 /**
  * Controller für die Wetter-GUI.
@@ -26,10 +29,15 @@ public class HelloController {
     @FXML
     private Label clothingTip;
 
+    @FXML
+    private TextArea historyArea;
+
     private final WeatherService weatherService;
+    private final HistoryService historyService;
 
     public HelloController() {
         this.weatherService = new WeatherService();
+        this.historyService = new HistoryService();
     }
 
     /**
@@ -65,6 +73,9 @@ public class HelloController {
                     temperature.setText("🌡️ Temperatur: " + data.getTemperatureFormatted());
                     humidity.setText("💧 Luftfeuchtigkeit: " + data.getHumidityFormatted());
                     if (clothingTip != null) clothingTip.setText(data.getClothingTip());
+
+                    // In Historie speichern
+                    historyService.saveToHistory(data);
                 });
 
             } catch (WeatherException e) {
@@ -76,5 +87,33 @@ public class HelloController {
                 });
             }
         }).start();
+    }
+
+    /**
+     * Zeigt die Historie an.
+     */
+    @FXML
+    protected void onShowHistoryClick() {
+        List<String> history = historyService.loadHistory();
+
+        if (history.isEmpty()) {
+            historyArea.setText("Noch keine Abfragen gespeichert.");
+        } else {
+            // Neueste zuerst anzeigen
+            StringBuilder sb = new StringBuilder();
+            for (int i = history.size() - 1; i >= 0; i--) {
+                sb.append(history.get(i)).append("\n");
+            }
+            historyArea.setText(sb.toString());
+        }
+    }
+
+    /**
+     * Löscht die Historie.
+     */
+    @FXML
+    protected void onClearHistoryClick() {
+        historyService.clearHistory();
+        historyArea.setText("Historie wurde gelöscht.");
     }
 }
