@@ -21,4 +21,5 @@
     <Label fx:id="welcomeText" />
     <Label fx:id="temperature" />
     <Label fx:id="humidity" />
+    <Label fx:id="clothingTip" wrapText="true" textAlignment="CENTER" />
 </VBox>
