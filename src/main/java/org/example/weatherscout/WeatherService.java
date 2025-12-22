@@ -6,6 +6,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class WeatherService {
@@ -14,6 +16,69 @@ public class WeatherService {
 
     public WeatherService() {
         this.httpClient = HttpClient.newHttpClient();
+    }
+
+    /**
+     * Sucht nach Städten für Autocomplete.
+     * Gibt eine Liste von Städtenamen zurück.
+     */
+    public List<String> searchCities(String query) {
+        List<String> cities = new ArrayList<>();
+
+        // Mindestens 2 Zeichen für Suche
+        if (query == null || query.length() < 2) {
+            return cities;
+        }
+
+        try {
+            String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
+            String url = "https://geocoding-api.open-meteo.com/v1/search?name=" + encoded + "&count=5&language=de";
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            String json = response.body();
+
+            // Prüfen ob Ergebnisse vorhanden
+            if (!json.contains("\"results\"")) {
+                return cities;
+            }
+
+            // Einfaches Parsing: Suche nach "name" und "country"
+            int index = 0;
+            while ((index = json.indexOf("\"name\":\"", index)) != -1) {
+                // Stadt-Name extrahieren
+                int nameStart = index + 8;
+                int nameEnd = json.indexOf("\"", nameStart);
+                String name = json.substring(nameStart, nameEnd);
+
+                // Land suchen (in der Nähe)
+                int countryIndex = json.indexOf("\"country\":\"", nameEnd);
+                String country = "";
+                if (countryIndex != -1 && countryIndex < nameEnd + 200) {
+                    int countryStart = countryIndex + 11;
+                    int countryEnd = json.indexOf("\"", countryStart);
+                    country = json.substring(countryStart, countryEnd);
+                }
+
+                // Zur Liste hinzufügen
+                if (!country.isEmpty()) {
+                    cities.add(name + ", " + country);
+                } else {
+                    cities.add(name);
+                }
+
+                index = nameEnd;
+            }
+
+        } catch (Exception e) {
+            System.err.println("Autocomplete-Fehler: " + e.getMessage());
+        }
+
+        return cities;
     }
 
     public WeatherData getWeather(String city) throws WeatherException {

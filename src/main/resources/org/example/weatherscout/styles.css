@@ -72,3 +72,20 @@
     -fx-border-radius: 10;
 }
 
+.suggestion-list {
+    -fx-background-color: white;
+    -fx-background-radius: 5;
+    -fx-border-color: #ccc;
+    -fx-border-radius: 5;
+    -fx-font-size: 14px;
+}
+
+.suggestion-list .list-cell {
+    -fx-padding: 8;
+    -fx-cursor: hand;
+}
+
+.suggestion-list .list-cell:hover {
+    -fx-background-color: #e0e0e0;
+}
+

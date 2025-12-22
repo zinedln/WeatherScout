@@ -3,6 +3,7 @@ package org.example.weatherscout;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
@@ -16,6 +17,9 @@ public class HelloController {
 
     @FXML
     private TextField cityInput;
+
+    @FXML
+    private ListView<String> suggestionList;
 
     @FXML
     private Label welcomeText;
@@ -41,12 +45,51 @@ public class HelloController {
     }
 
     /**
+     * Wird automatisch nach dem Laden der FXML aufgerufen.
+     * Hier richten wir das Autocomplete ein.
+     */
+    @FXML
+    public void initialize() {
+        // Listener für Texteingabe - bei Änderung Vorschläge laden
+        cityInput.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.length() >= 2) {
+                // Suche im Hintergrund-Thread
+                new Thread(() -> {
+                    List<String> cities = weatherService.searchCities(newValue);
+
+                    // UI-Update im JavaFX-Thread
+                    Platform.runLater(() -> {
+                        suggestionList.getItems().clear();
+                        suggestionList.getItems().addAll(cities);
+                        suggestionList.setVisible(!cities.isEmpty());
+                    });
+                }).start();
+            } else {
+                suggestionList.setVisible(false);
+            }
+        });
+
+        // Bei Klick auf einen Vorschlag: Stadt übernehmen und suchen
+        suggestionList.setOnMouseClicked(event -> {
+            String selected = suggestionList.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                // Nur den Stadtnamen nehmen (vor dem Komma)
+                String city = selected.contains(",") ? selected.split(",")[0].trim() : selected;
+                cityInput.setText(city);
+                suggestionList.setVisible(false);
+                onHelloButtonClick();  // Direkt Wetter abrufen
+            }
+        });
+    }
+
+    /**
      * Wird beim Klick auf den "Suchen"-Button ausgeführt.
      * Holt die Wetterdaten für die eingegebene Stadt.
      */
     @FXML
     protected void onHelloButtonClick() {
         String city = cityInput.getText().trim();
+        suggestionList.setVisible(false);  // Vorschläge ausblenden
 
         if (city.isEmpty()) {
             welcomeText.setText("Bitte gib eine Stadt ein!");
