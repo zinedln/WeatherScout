@@ -1,4 +1,4 @@
-package org.example.weatherscout;
+package org.example.weatherscout.client;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -10,8 +10,8 @@ import java.io.IOException;
 public class HelloApplication extends Application {
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 400, 400);
+        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("/org/example/weatherscout/hello-view.fxml"));
+        Scene scene = new Scene(fxmlLoader.load(), 800, 600);
         stage.setTitle("WeatherScout");
         stage.setScene(scene);
         stage.show();

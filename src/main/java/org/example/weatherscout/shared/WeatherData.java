@@ -1,31 +1,15 @@
-package org.example.weatherscout;
+package org.example.weatherscout.shared;
 
-/**
- * Record für Wetterdaten einer Stadt.
- *
- * @param city Name der Stadt
- * @param temperature Temperatur in Grad Celsius
- * @param humidity Luftfeuchtigkeit in Prozent
- */
 public record WeatherData(String city, double temperature, int humidity) {
 
-    /**
-     * Gibt die Temperatur formatiert zurück.
-     */
     public String getTemperatureFormatted() {
         return String.format("%.1f°C", temperature);
     }
 
-    /**
-     * Gibt die Luftfeuchtigkeit formatiert zurück.
-     */
     public String getHumidityFormatted() {
         return humidity + "%";
     }
 
-    /**
-     * Gibt einen Kleidungstipp basierend auf der Temperatur zurück.
-     */
     public String getClothingTip() {
         if (temperature < 0) {
             return "Es ist sehr kalt! Zieh dich warm an mit Winterjacke und Handschuhen.";

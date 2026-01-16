@@ -11,9 +11,9 @@
 
 <VBox alignment="CENTER" prefHeight="600.0" prefWidth="450.0" spacing="15.0"
       stylesheets="@styles.css"
-      xmlns="http://javafx.com/javafx/24.0.1"
+      xmlns="http://javafx.com/javafx/21.0.6"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.example.weatherscout.HelloController">
+      fx:controller="org.example.weatherscout.client.HelloController">
     <padding>
         <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
     </padding>

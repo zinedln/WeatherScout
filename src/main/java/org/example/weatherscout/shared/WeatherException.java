@@ -1,8 +1,5 @@
-package org.example.weatherscout;
+package org.example.weatherscout.shared;
 
-/**
- * Exception für Fehler bei der Wetter-API-Abfrage.
- */
 public class WeatherException extends Exception {
 
     public WeatherException(String message) {

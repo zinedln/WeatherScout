@@ -1,4 +1,4 @@
-package org.example.weatherscout;
+package org.example.weatherscout.client;
 
 import javafx.application.Application;
 
