@@ -6,6 +6,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
@@ -19,6 +20,8 @@
     </padding>
 
     <Label text="☀️ WeatherScout" styleClass="title-label" />
+
+    <ToggleButton fx:id="unitToggle" text="°C" onAction="#onUnitToggle" styleClass="unit-toggle" />
 
     <!-- Suchfeld mit Autocomplete -->
     <VBox spacing="0" alignment="CENTER">

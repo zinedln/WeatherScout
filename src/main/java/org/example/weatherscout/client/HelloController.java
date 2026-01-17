@@ -15,9 +15,12 @@ public class HelloController extends AbstractLogs {
     @FXML private Label humidity;
     @FXML private Label clothingTip;
     @FXML private TextArea historyArea;
+    @FXML private ToggleButton unitToggle;
 
     private final WeatherClient clientService;
     private final HistoryService historyService;
+    private boolean isFahrenheit = false;
+    private WeatherData lastWeatherData;
 
     public HelloController() {
         this.clientService = new WeatherClient();
@@ -86,13 +89,14 @@ public class HelloController extends AbstractLogs {
             double temp = Double.parseDouble(parts[2]);
             int hum = Integer.parseInt(parts[3]);
 
+            lastWeatherData = new WeatherData(city, temp, hum);
+
             welcomeText.setText("Wetter in " + city);
-            temperature.setText(String.format("🌡 %.1f °C", temp));
+            updateTemperatureDisplay(temp);
             humidity.setText("💧 " + hum + "%");
 
-            WeatherData data = new WeatherData(city, temp, hum);
-            if (clothingTip != null) clothingTip.setText(data.getClothingTip());
-            historyService.saveToHistory(data);
+            if (clothingTip != null) clothingTip.setText(lastWeatherData.getClothingTip());
+            historyService.saveToHistory(lastWeatherData);
 
         } else if (parts[0].equals("ERROR")) {
             welcomeText.setText("Fehler: " + (parts.length > 1 ? parts[1] : "Unbekannt"));
@@ -110,5 +114,24 @@ public class HelloController extends AbstractLogs {
     protected void onClearHistoryClick() {
         historyService.clearHistory();
         historyArea.setText("Historie gelöscht.");
+    }
+
+    @FXML
+    protected void onUnitToggle() {
+        isFahrenheit = unitToggle.isSelected();
+        unitToggle.setText(isFahrenheit ? "°F" : "°C");
+
+        if (lastWeatherData != null) {
+            updateTemperatureDisplay(lastWeatherData.temperature());
+        }
+    }
+
+    private void updateTemperatureDisplay(double tempCelsius) {
+        if (isFahrenheit) {
+            double tempF = tempCelsius * 9 / 5 + 32;
+            temperature.setText(String.format("🌡 %.1f °F", tempF));
+        } else {
+            temperature.setText(String.format("🌡 %.1f °C", tempCelsius));
+        }
     }
 }

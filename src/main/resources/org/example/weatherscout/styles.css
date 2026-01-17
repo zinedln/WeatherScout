@@ -89,3 +89,16 @@
     -fx-background-color: #e0e0e0;
 }
 
+.unit-toggle {
+    -fx-font-size: 14px;
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+}
+
+.unit-toggle:selected {
+    -fx-background-color: #FF9800;
+}
+
