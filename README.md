@@ -1,13 +1,13 @@
-# WeatherScout 🌤️
+# WeatherScout
 
 Eine JavaFX-Anwendung zur Abfrage von Wetterdaten.
 
 ## Features
 
-- 🔍 Suche nach Städten weltweit
-- 🌡️ Aktuelle Temperatur anzeigen
-- 💧 Luftfeuchtigkeit anzeigen
-- 👕 Kleidungstipps basierend auf dem Wetter
+- Suche nach Städten weltweit
+- Aktuelle Temperatur anzeigen
+- Luftfeuchtigkeit anzeigen
+- Kleidungstipps basierend auf dem Wetter
 
 ## Projektstruktur
 
