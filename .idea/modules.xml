@@ -5,6 +5,9 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/WeatherScout.iml" filepath="$PROJECT_DIR$/.idea/modules/WeatherScout.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/WeatherScout.main.iml" filepath="$PROJECT_DIR$/.idea/modules/WeatherScout.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/WeatherScout.test.iml" filepath="$PROJECT_DIR$/.idea/modules/WeatherScout.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.example.WeatherScout.iml" filepath="$PROJECT_DIR$/.idea/modules/org.example.WeatherScout.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.example.WeatherScout.main.iml" filepath="$PROJECT_DIR$/.idea/modules/org.example.WeatherScout.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.example.WeatherScout.test.iml" filepath="$PROJECT_DIR$/.idea/modules/org.example.WeatherScout.test.iml" />
     </modules>
   </component>
 </project>

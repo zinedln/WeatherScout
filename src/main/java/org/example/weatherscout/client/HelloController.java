@@ -35,6 +35,44 @@ public class HelloController extends AbstractLogs {
     @FXML
     public void initialize() {
         if (suggestionList != null) suggestionList.setVisible(false);
+
+        // TextFormatter: verhindert das Einfügen/Tippen von Ziffern
+        if (cityInput != null) {
+            cityInput.setTextFormatter(new TextFormatter<String>(change -> {
+                String newText = change.getText();
+                if (newText != null && newText.matches(".*\\d.*")) {
+                    // Verwerfe Änderungen, die Ziffern enthalten und zeige sofort Feedback
+                    if (welcomeText != null) welcomeText.setText("Fehler: Der Stadtname darf keine Zahlen enthalten.");
+                    cityInput.setStyle("-fx-border-color: red; -fx-border-width: 1;");
+                    return null; // Änderung verwerfen
+                } else {
+                    // Falls vorher eine Fehlermeldung angezeigt wurde, entfernen
+                    if (welcomeText != null && "Fehler: Der Stadtname darf keine Zahlen enthalten.".equals(welcomeText.getText())) {
+                        welcomeText.setText("");
+                    }
+                    cityInput.setStyle("");
+                }
+                return change;
+            }));
+
+            // Live-Validierung: prüft bei jeder Texteingabe, ob Ziffern vorhanden sind
+            cityInput.textProperty().addListener((obs, oldVal, newVal) -> {
+                if (newVal == null) return;
+                String trimmed = newVal.trim();
+
+                if (isCityInvalid(trimmed)) {
+                    // Zeige sofortige Fehlermeldung im welcomeText und markiere das Feld
+                    welcomeText.setText("Fehler: Der Stadtname darf keine Zahlen enthalten.");
+                    cityInput.setStyle("-fx-border-color: red; -fx-border-width: 1;");
+                } else {
+                    // Entferne die Fehlermarkierung nur, wenn sie zuvor von unserer Validierung gesetzt wurde
+                    if ("Fehler: Der Stadtname darf keine Zahlen enthalten.".equals(welcomeText.getText())) {
+                        welcomeText.setText("");
+                    }
+                    cityInput.setStyle("");
+                }
+            });
+        }
     }
 
     @FXML
@@ -42,6 +80,15 @@ public class HelloController extends AbstractLogs {
         String city = cityInput.getText().trim();
         if (city.isEmpty()) {
             welcomeText.setText("Bitte Stadt eingeben!");
+            return;
+        }
+
+        // Neue Validierung: keine Ziffern in Stadtnamen erlaubt
+        if (isCityInvalid(city)) {
+            welcomeText.setText("Fehler: Der Stadtname darf keine Zahlen enthalten.");
+            // Fokus zurück auf das Eingabefeld und kompletten Text markieren, damit der Nutzer neu eingeben kann
+            cityInput.requestFocus();
+            cityInput.selectAll();
             return;
         }
 
@@ -133,5 +180,11 @@ public class HelloController extends AbstractLogs {
         } else {
             temperature.setText(String.format("🌡 %.1f °C", tempCelsius));
         }
+    }
+
+    // Hilfsmethode: true, wenn der Stadtnamen Ziffern enthält (klarer Name, verhindert invertierte Aufrufe)
+    private boolean isCityInvalid(String city) {
+        // Gibt true zurück, wenn der String mindestens eine Ziffer enthält.
+        return city != null && city.matches(".*\\d.*");
     }
 }
