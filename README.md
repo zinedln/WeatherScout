@@ -8,20 +8,33 @@ Eine JavaFX-Anwendung zur Abfrage von Wetterdaten.
 - Aktuelle Temperatur anzeigen
 - Luftfeuchtigkeit anzeigen
 - Kleidungstipps basierend auf dem Wetter
+- Umwandlung von Celsius in Fahrenheit als Toggle Button in der GUI
 
 ## Projektstruktur
 
 ```
 src/main/java/org/example/weatherscout/
-├── HelloApplication.java  # JavaFX Application Entry Point
-├── HelloController.java   # GUI Controller
-├── Launcher.java          # Starter-Klasse für modulares JavaFX
-├── WeatherService.java    # API-Service für Wetterdaten
-├── WeatherData.java       # Datenmodell für Wetterdaten
-└── WeatherException.java  # Exception-Klasse
+├── client/
+│   ├── HelloApplication.java
+│   ├── HelloController.java
+│   ├── HistoryService.java
+│   ├── Launcher.java
+│   └── WeatherClient.java
+├── server/
+│   ├── ClientHandler.java
+│   ├── OpenMeteo.java
+│   └── WeatherServer.java
+├── shared/
+│   ├── Protocol.java
+│   ├── WeatherData.java
+│   └── WeatherException.java
+└── utils/
+    ├── AbstractLogs.java
+    └── Config.java
 
 src/main/resources/org/example/weatherscout/
-└── hello-view.fxml        # GUI Layout
+├── hello-view.fxml
+└── styles.css
 ```
 
 ## Starten
