@@ -24,7 +24,7 @@ public class HelloController extends AbstractLogs {
 
     public HelloController() {
         this.clientService = new WeatherClient();
-        this.historyService = new HistoryService();
+        this.historyService = HistoryService.getInstance();
     }
 
     @Override
@@ -72,6 +72,20 @@ public class HelloController extends AbstractLogs {
                     cityInput.setStyle("");
                 }
             });
+        }
+
+        // TEST: Funktioniert Singleton?
+        HistoryService s1 = HistoryService.getInstance();
+        HistoryService s2 = HistoryService.getInstance();
+
+        log("Test Instanz 1: " + s1.toString());
+        log("Test Instanz 2: " + s2.toString());
+
+        if (s1 == s2) {
+            log("ERFOLG: Es ist dieselbe Instanz. Singleton funktioniert.");
+        }
+        else {
+            log("FEHLER: Es sind unterschiedliche/mehrere Instanzen!");
         }
     }
 

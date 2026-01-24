@@ -1,6 +1,7 @@
 package org.example.weatherscout.client;
 
 import org.example.weatherscout.shared.WeatherData;
+import org.example.weatherscout.utils.Config;
 
 import java.io.*;
 import java.time.LocalDateTime;
@@ -11,10 +12,22 @@ import java.util.List;
 
 public class HistoryService {
 
-    private static final String HISTORY_FILE = "weather_history.txt";
+    private static HistoryService instance;
+    private final String historyFile;
 
     private static final DateTimeFormatter formatter =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
+    private HistoryService() {
+        this.historyFile = Config.getHistoryFile();
+    }
+
+    public static synchronized HistoryService getInstance() {
+        if (instance == null) {
+            instance = new HistoryService();
+        }
+        return instance;
+    }
 
     public void saveToHistory(WeatherData data) {
         String timestamp = LocalDateTime.now().format(formatter);
@@ -23,12 +36,10 @@ public class HistoryService {
                       data.getTemperatureFormatted() + " | " +
                       data.getHumidityFormatted();
 
-        try (FileWriter fw = new FileWriter(HISTORY_FILE, true);
+        try (FileWriter fw = new FileWriter(historyFile, true);
              BufferedWriter bw = new BufferedWriter(fw)) {
-
             bw.write(line);
             bw.newLine();
-
         } catch (IOException e) {
             System.err.println("Fehler beim Speichern der Historie: " + e.getMessage());
         }
@@ -36,8 +47,7 @@ public class HistoryService {
 
     public List<String> loadHistory() {
         List<String> history = new ArrayList<>();
-
-        File file = new File(HISTORY_FILE);
+        File file = new File(historyFile);
 
         if (!file.exists()) {
             return history;
@@ -59,7 +69,7 @@ public class HistoryService {
     }
 
     public void clearHistory() {
-        File file = new File(HISTORY_FILE);
+        File file = new File(historyFile);
         if (file.exists()) {
             file.delete();
         }
