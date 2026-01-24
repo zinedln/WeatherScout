@@ -1,6 +1,7 @@
 package org.example.weatherscout.server;
 
 import org.example.weatherscout.utils.AbstractLogs;
+import org.example.weatherscout.utils.Config;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -8,7 +9,7 @@ import java.net.Socket;
 
 public class WeatherServer extends AbstractLogs {
 
-    private static final int PORT = 4711;
+    private static final int PORT = Config.getPort();
     private final OpenMeteo apiProvider;
 
     public WeatherServer() {

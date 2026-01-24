@@ -1,13 +1,14 @@
 package org.example.weatherscout.client;
 
 import org.example.weatherscout.utils.AbstractLogs;
+import org.example.weatherscout.utils.Config;
 
 import java.io.*;
 import java.net.Socket;
 
 public class WeatherClient extends AbstractLogs {
-    private static final String SERVER_HOST = "localhost";
-    private static final int SERVER_PORT = 4711;
+    private static final String SERVER_HOST = Config.getHost();
+    private static final int SERVER_PORT = Config.getPort();
 
     @Override
     protected String getPrefix() {
