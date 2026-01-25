@@ -26,13 +26,20 @@ tasks.withType<JavaCompile> {
 }
 
 application {
-    mainModule.set("org.example.weatherscout")
-    mainClass.set("org.example.weatherscout.HelloApplication")
+    mainClass.set("org.example.weatherscout.client.Launcher")
 }
 
 javafx {
     version = "21.0.6"
     modules = listOf("javafx.controls", "javafx.fxml")
+}
+
+//Java FX Fehler weg
+tasks.named<JavaExec>("run") {
+    jvmArgs = listOf(
+        "--add-modules", "javafx.controls,javafx.fxml",
+        "--add-opens", "javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED"
+    )
 }
 
 dependencies {

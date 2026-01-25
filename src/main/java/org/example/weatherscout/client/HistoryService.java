@@ -32,9 +32,16 @@ public class HistoryService {
     public void saveToHistory(WeatherData data) {
         String timestamp = LocalDateTime.now().format(formatter);
 
-        String line = timestamp + " | " + data.city() + " | " +
-                      data.getTemperatureFormatted() + " | " +
-                      data.getHumidityFormatted();
+        String line = timestamp + " | " +
+                      "Stadt: " + data.city() + " | " +
+                      "Wetter: " + data.getWeatherDescription() + " | " +
+                      "Temperatur: " + String.format("%.1f", data.temperature()) + "°C | " +
+                      "Gefühlt wie: " + String.format("%.1f", data.apparentTemp()) + "°C | " +
+                      "Luftfeuchtigkeit: " + data.humidity() + "% | " +
+                      "Taupunkt: " + String.format("%.1f", data.dewPoint()) + "°C | " +
+                      "Wolkenbedeckung: " + data.getCloudDescription() + " | " +
+                      "Windgeschwindigkeit: " + String.format("%.1f", data.windSpeed()) + " km/h (" + data.getWindDescription() + ") | " +
+                      "Windböen: " + String.format("%.1f", data.windGusts()) + " km/h";
 
         try (FileWriter fw = new FileWriter(historyFile, true);
              BufferedWriter bw = new BufferedWriter(fw)) {

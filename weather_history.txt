@@ -1,17 +1,2 @@
-25.01.2026 17:06 | Berlin | -1.4°C | 79%
-25.01.2026 17:06 | Berlin | -1.4°C | 79%
-25.01.2026 17:06 | Berlin | -1.4°C | 79%
-25.01.2026 17:06 | Berlin | -1.4°C | 79%
-25.01.2026 17:06 | Berlin | -1.4°C | 79%
-25.01.2026 17:06 | Berlin | -1.4°C | 79%
-25.01.2026 17:06 | Wien | 3.2°C | 95%
-25.01.2026 17:06 | Amman | 11.6°C | 58%
-25.01.2026 17:13 | wien | 3.2°C | 95%
-25.01.2026 17:18 | wien | 3.2°C | 95%
-25.01.2026 17:19 | berlin | -1.4°C | 79%
-25.01.2026 17:20 | new york | -14.7°C | 63%
-25.01.2026 17:21 | nairobi | 24.2°C | 34%
-25.01.2026 17:22 | sydney | 21.8°C | 68%
-25.01.2026 17:40 | wien | 3.3°C | 94%
-25.01.2026 17:43 | wien | 3.3°C | 94%
-25.01.2026 17:45 | wien | 3.3°C | 94%
+25.01.2026 19:24 | Stadt: pound town | Wetter: Bedeckt | Temperatur: 6.6°C | Gefühlt wie: 2.7°C | Luftfeuchtigkeit: 85% | Taupunkt: 4.3°C | Wolkenbedeckung: Bedeckt | Windgeschwindigkeit: 17.3 km/h (Frischer Wind) | Windböen: 31.3 km/h
+25.01.2026 20:01 | Stadt: wien | Wetter: Nieselregen | Temperatur: 3.3°C | Gefühlt wie: -0.2°C | Luftfeuchtigkeit: 95% | Taupunkt: 2.5°C | Wolkenbedeckung: Bedeckt | Windgeschwindigkeit: 12.0 km/h (Frischer Wind) | Windböen: 26.6 km/h

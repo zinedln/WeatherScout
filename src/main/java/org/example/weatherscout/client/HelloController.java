@@ -2,6 +2,7 @@ package org.example.weatherscout.client;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import org.example.weatherscout.shared.WeatherData;
@@ -18,11 +19,23 @@ public class HelloController extends AbstractLogs {
     @FXML private TextArea historyArea;
     @FXML private ToggleButton unitToggle;
     @FXML private Button detailsButton;
+    @FXML private Button themeButton;
 
     private final WeatherClient clientService;
     private final HistoryService historyService;
     private boolean isFahrenheit = false;
     private WeatherData lastWeatherData;
+    private int currentTheme = 0;
+    private static final String[] THEMES = {
+        "normal-theme.css",
+        "dark-theme.css",
+        "christmas-theme.css",
+        "halloween-theme.css",
+        "lgbtq-theme.css"
+    };
+    private static final String[] THEME_NAMES = {
+        "Normal", "Dark", "Christmas", "Halloween", "LGBTQ"
+    };
 
     private static final String VALIDATION_ERROR = "Fehler: Nur Buchstaben, Leerzeichen und Bindestriche erlaubt.";
 
@@ -128,6 +141,23 @@ public class HelloController extends AbstractLogs {
             return false;
         }
         return city.matches(".*[a-zA-ZäöüßÄÖÜ].*");
+    }
+
+    public void changeTheme() {
+        currentTheme = (currentTheme + 1) % THEMES.length;
+        String cssResource = getClass().getResource("/org/example/weatherscout/" + THEMES[currentTheme]).toExternalForm();
+
+        Scene scene = temperature.getScene();
+        if (scene != null) {
+            scene.getStylesheets().clear();
+            scene.getStylesheets().add(cssResource);
+        }
+
+        if (themeButton != null) {
+            themeButton.setText(THEME_NAMES[currentTheme]);
+        }
+
+        log("Theme gewechselt zu: " + THEME_NAMES[currentTheme]);
     }
 
     private Task<String> createWeatherTask(String city) {

@@ -22,6 +22,8 @@
 
 .search-field {
     -fx-font-size: 14px;
+    -fx-background-color: white;
+    -fx-text-fill: black;
     -fx-background-radius: 20;
     -fx-padding: 10;
 }
@@ -52,6 +54,37 @@
     -fx-background-color: #66BB6A;
 }
 
+.details-button {
+    -fx-font-size: 12px;
+    -fx-background-color: #2196F3;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.details-button:hover {
+    -fx-background-color: #1976D2;
+}
+
+.details-button:disabled {
+    -fx-background-color: #BDBDBD;
+    -fx-text-fill: #757575;
+}
+
+.export-button {
+    -fx-font-size: 12px;
+    -fx-background-color: #9C27B0;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.export-button:hover {
+    -fx-background-color: #7B1FA2;
+}
+
 .clear-button {
     -fx-font-size: 12px;
     -fx-background-color: #f44336;
@@ -62,61 +95,27 @@
 }
 
 .clear-button:hover {
-    -fx-background-color: #ef5350;
-}
-
-.history-area {
-    -fx-font-size: 12px;
-    -fx-background-color: rgba(255, 255, 255, 0.9);
-    -fx-background-radius: 10;
-    -fx-border-radius: 10;
-}
-
-.suggestion-list {
-    -fx-background-color: white;
-    -fx-background-radius: 5;
-    -fx-border-color: #ccc;
-    -fx-border-radius: 5;
-    -fx-font-size: 14px;
-}
-
-.suggestion-list .list-cell {
-    -fx-padding: 8;
-    -fx-cursor: hand;
-}
-
-.suggestion-list .list-cell:hover {
-    -fx-background-color: #e0e0e0;
+    -fx-background-color: #da190b;
 }
 
 .unit-toggle {
-    -fx-font-size: 14px;
-    -fx-background-color: #2196F3;
+    -fx-font-size: 12px;
+    -fx-background-color: #FF9800;
     -fx-text-fill: white;
     -fx-background-radius: 15;
-    -fx-padding: 8 20;
+    -fx-padding: 8 15;
     -fx-cursor: hand;
 }
 
 .unit-toggle:selected {
-    -fx-background-color: #FF9800;
+    -fx-background-color: #FFC107;
+    -fx-text-fill: black;
 }
 
-.details-button {
-    -fx-font-size: 13px;
-    -fx-background-color: #00BCD4;
-    -fx-text-fill: white;
-    -fx-background-radius: 15;
-    -fx-padding: 10 20;
-    -fx-cursor: hand;
-}
-
-.details-button:hover {
-    -fx-background-color: #00ACC1;
-}
-
-.details-button:disabled {
-    -fx-background-color: #cccccc;
-    -fx-cursor: default;
+.history-area {
+    -fx-font-size: 11px;
+    -fx-background-color: #f5f5f5;
+    -fx-text-fill: #333333;
+    -fx-padding: 10;
 }
 

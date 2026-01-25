@@ -1,0 +1,122 @@
+.root {
+    -fx-background-color: linear-gradient(to bottom, #1a0033, #330000);
+    -fx-font-family: "Arial";
+}
+
+.title-label {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ff9900;
+}
+
+.info-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: #ffffff;
+}
+
+.tip-label {
+    -fx-font-size: 16px;
+    -fx-text-fill: #ff9900;
+    -fx-font-weight: bold;
+}
+
+.search-field {
+    -fx-font-size: 14px;
+    -fx-background-color: #000000;
+    -fx-text-fill: #ff9900;
+    -fx-background-radius: 20;
+    -fx-padding: 10;
+}
+
+.search-button {
+    -fx-font-size: 14px;
+    -fx-background-color: #ff9900;
+    -fx-text-fill: #000000;
+    -fx-background-radius: 20;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.search-button:hover {
+    -fx-background-color: #ff7700;
+}
+
+.history-button {
+    -fx-font-size: 12px;
+    -fx-background-color: #00ff00;
+    -fx-text-fill: #000000;
+    -fx-background-radius: 15;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.history-button:hover {
+    -fx-background-color: #00dd00;
+}
+
+.details-button {
+    -fx-font-size: 12px;
+    -fx-background-color: #9933cc;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.details-button:hover {
+    -fx-background-color: #7722aa;
+}
+
+.details-button:disabled {
+    -fx-background-color: #555555;
+    -fx-text-fill: #999999;
+}
+
+.export-button {
+    -fx-font-size: 12px;
+    -fx-background-color: #ffff00;
+    -fx-text-fill: #000000;
+    -fx-background-radius: 15;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.export-button:hover {
+    -fx-background-color: #ffdd00;
+}
+
+.clear-button {
+    -fx-font-size: 12px;
+    -fx-background-color: #000000;
+    -fx-text-fill: #ff9900;
+    -fx-background-radius: 15;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.clear-button:hover {
+    -fx-background-color: #333333;
+    -fx-text-fill: #ffaa00;
+}
+
+.unit-toggle {
+    -fx-font-size: 12px;
+    -fx-background-color: #ff9900;
+    -fx-text-fill: #000000;
+    -fx-background-radius: 15;
+    -fx-padding: 8 15;
+    -fx-cursor: hand;
+}
+
+.unit-toggle:selected {
+    -fx-background-color: #9933cc;
+    -fx-text-fill: white;
+}
+
+.history-area {
+    -fx-font-size: 11px;
+    -fx-background-color: #1a0000;
+    -fx-text-fill: #ff9900;
+    -fx-padding: 10;
+}
+
