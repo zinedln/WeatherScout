@@ -56,18 +56,30 @@ public class OpenMeteo extends AbstractLogs implements WeatherProvider {
 
     private String fetchFromApi(String city, double lat, double lon) throws Exception {
         String url = String.format(Locale.US,
-                "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m",
+                "https://api.open-meteo.com/v1/forecast?latitude=%.4f&longitude=%.4f&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m,cloud_cover,dew_point_2m",
                 lat, lon);
 
         String json = sendRequest(url);
 
-        // Parsing
+        log("API Response: " + json.substring(0, Math.min(500, json.length())));
+
         int currentIdx = json.indexOf("\"current\"");
         String currentSection = json.substring(currentIdx);
         double temp = extractNumber(currentSection, "\"temperature_2m\":");
         int humidity = (int) extractNumber(currentSection, "\"relative_humidity_2m\":");
+        double apparentTemp = extractNumber(currentSection, "\"apparent_temperature\":");
+        int weatherCode = (int) extractNumber(currentSection, "\"weather_code\":");
+        double windSpeed = extractNumber(currentSection, "\"wind_speed_10m\":");
+        double windGusts = extractNumber(currentSection, "\"wind_gusts_10m\":");
+        int cloudCover = (int) extractNumber(currentSection, "\"cloud_cover\":");
+        double dewPoint = extractNumber(currentSection, "\"dew_point_2m\":");
 
-        return String.format(Locale.US, "OK|%s|%.1f|%d", city, temp, humidity);
+        log("Geparste Werte: temp=" + temp + ", humidity=" + humidity + ", apparentTemp=" + apparentTemp +
+            ", weatherCode=" + weatherCode + ", windSpeed=" + windSpeed + ", windGusts=" + windGusts +
+            ", cloudCover=" + cloudCover + ", dewPoint=" + dewPoint);
+
+        return String.format(Locale.US, "OK|%s|%.1f|%d|%.1f|%d|%.1f|%.1f|%d|%.1f",
+                city, temp, humidity, apparentTemp, weatherCode, windSpeed, windGusts, cloudCover, dewPoint);
     }
 
     private String sendRequest(String url) throws Exception {

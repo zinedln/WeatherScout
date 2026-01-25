@@ -3,24 +3,28 @@ package org.example.weatherscout.client;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import org.example.weatherscout.shared.WeatherData;
 import org.example.weatherscout.utils.AbstractLogs;
 
 public class HelloController extends AbstractLogs {
 
     @FXML private TextField cityInput;
-    @FXML private ListView<String> suggestionList;
     @FXML private Label welcomeText;
     @FXML private Label temperature;
     @FXML private Label humidity;
+    @FXML private HBox humidityBox;
     @FXML private Label clothingTip;
     @FXML private TextArea historyArea;
     @FXML private ToggleButton unitToggle;
+    @FXML private Button detailsButton;
 
     private final WeatherClient clientService;
     private final HistoryService historyService;
     private boolean isFahrenheit = false;
     private WeatherData lastWeatherData;
+
+    private static final String VALIDATION_ERROR = "Fehler: Nur Buchstaben, Leerzeichen und Bindestriche erlaubt.";
 
     public HelloController() {
         this.clientService = new WeatherClient();
@@ -34,47 +38,8 @@ public class HelloController extends AbstractLogs {
 
     @FXML
     public void initialize() {
-        if (suggestionList != null) suggestionList.setVisible(false);
+        setupCityValidation();
 
-        // TextFormatter: verhindert das Einfügen/Tippen von Ziffern
-        if (cityInput != null) {
-            cityInput.setTextFormatter(new TextFormatter<String>(change -> {
-                String newText = change.getText();
-                if (newText != null && newText.matches(".*\\d.*")) {
-                    // Verwerfe Änderungen, die Ziffern enthalten und zeige sofort Feedback
-                    if (welcomeText != null) welcomeText.setText("Fehler: Der Stadtname darf keine Zahlen enthalten.");
-                    cityInput.setStyle("-fx-border-color: red; -fx-border-width: 1;");
-                    return null; // Änderung verwerfen
-                } else {
-                    // Falls vorher eine Fehlermeldung angezeigt wurde, entfernen
-                    if (welcomeText != null && "Fehler: Der Stadtname darf keine Zahlen enthalten.".equals(welcomeText.getText())) {
-                        welcomeText.setText("");
-                    }
-                    cityInput.setStyle("");
-                }
-                return change;
-            }));
-
-            // Live-Validierung: prüft bei jeder Texteingabe, ob Ziffern vorhanden sind
-            cityInput.textProperty().addListener((obs, oldVal, newVal) -> {
-                if (newVal == null) return;
-                String trimmed = newVal.trim();
-
-                if (isCityInvalid(trimmed)) {
-                    // Zeige sofortige Fehlermeldung im welcomeText und markiere das Feld
-                    welcomeText.setText("Fehler: Der Stadtname darf keine Zahlen enthalten.");
-                    cityInput.setStyle("-fx-border-color: red; -fx-border-width: 1;");
-                } else {
-                    // Entferne die Fehlermarkierung nur, wenn sie zuvor von unserer Validierung gesetzt wurde
-                    if ("Fehler: Der Stadtname darf keine Zahlen enthalten.".equals(welcomeText.getText())) {
-                        welcomeText.setText("");
-                    }
-                    cityInput.setStyle("");
-                }
-            });
-        }
-
-        // TEST: Funktioniert Singleton?
         HistoryService s1 = HistoryService.getInstance();
         HistoryService s2 = HistoryService.getInstance();
 
@@ -89,18 +54,56 @@ public class HelloController extends AbstractLogs {
         }
     }
 
+    private void setupCityValidation() {
+        if (cityInput == null) return;
+
+        cityInput.setTextFormatter(new TextFormatter<String>(change -> {
+            if (!isValidInput(change.getText())) {
+                showValidationError();
+                return null;
+            }
+            clearValidationError();
+            return change;
+        }));
+
+        cityInput.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) return;
+            if (!isValidInput(newVal)) {
+                showValidationError();
+            } else {
+                clearValidationError();
+            }
+        });
+    }
+
+    private boolean isValidInput(String input) {
+        if (input == null || input.isEmpty()) return true;
+        return input.matches("[a-zA-ZäöüßÄÖÜ\\s-]*");
+    }
+
+    private void showValidationError() {
+        welcomeText.setText(VALIDATION_ERROR);
+        cityInput.setStyle("-fx-border-color: #b83535; -fx-border-width: 1;");
+    }
+
+    private void clearValidationError() {
+        if (VALIDATION_ERROR.equals(welcomeText.getText())) {
+            welcomeText.setText("");
+        }
+        cityInput.setStyle("");
+    }
+
     @FXML
     protected void onHelloButtonClick() {
         String city = cityInput.getText().trim();
+
         if (city.isEmpty()) {
             welcomeText.setText("Bitte Stadt eingeben!");
             return;
         }
 
-        // Neue Validierung: keine Ziffern in Stadtnamen erlaubt
-        if (isCityInvalid(city)) {
-            welcomeText.setText("Fehler: Der Stadtname darf keine Zahlen enthalten.");
-            // Fokus zurück auf das Eingabefeld und kompletten Text markieren, damit der Nutzer neu eingeben kann
+        if (!isCityValid(city)) {
+            welcomeText.setText(VALIDATION_ERROR);
             cityInput.requestFocus();
             cityInput.selectAll();
             return;
@@ -109,11 +112,22 @@ public class HelloController extends AbstractLogs {
         welcomeText.setText("Lade Daten...");
         temperature.setText("");
         humidity.setText("");
+        if (humidityBox != null) humidityBox.setVisible(false);
         if (clothingTip != null) clothingTip.setText("");
+        if (detailsButton != null) detailsButton.setDisable(true);
 
         Task<String> weatherTask = createWeatherTask(city);
-
         new Thread(weatherTask).start();
+    }
+
+    private boolean isCityValid(String city) {
+        if (city == null || city.isEmpty()) {
+            return false;
+        }
+        if (!city.matches("[a-zA-ZäöüßÄÖÜ\\s-]*")) {
+            return false;
+        }
+        return city.matches(".*[a-zA-ZäöüßÄÖÜ].*");
     }
 
     private Task<String> createWeatherTask(String city) {
@@ -130,10 +144,10 @@ public class HelloController extends AbstractLogs {
         });
 
         weatherTask.setOnFailed(e -> {
-        Throwable error = weatherTask.getException();
-        welcomeText.setText("Verbindungsfehler!");
-        log("Fehler: " + error.getMessage());
-    });
+            Throwable error = weatherTask.getException();
+            welcomeText.setText("Verbindungsfehler!");
+            log("Fehler: " + error.getMessage());
+        });
         return weatherTask;
     }
 
@@ -150,13 +164,27 @@ public class HelloController extends AbstractLogs {
             double temp = Double.parseDouble(parts[2]);
             int hum = Integer.parseInt(parts[3]);
 
-            lastWeatherData = new WeatherData(city, temp, hum);
+            double apparentTemp = parts.length > 4 ? Double.parseDouble(parts[4]) : temp;
+            int weatherCode = parts.length > 5 ? Integer.parseInt(parts[5]) : 0;
+            double windSpeed = parts.length > 6 ? Double.parseDouble(parts[6]) : 0;
+            double windGusts = parts.length > 7 ? Double.parseDouble(parts[7]) : 0;
+            int cloudCover = parts.length > 8 ? Integer.parseInt(parts[8]) : 0;
+            double dewPoint = parts.length > 9 ? Double.parseDouble(parts[9]) : 0;
+
+            lastWeatherData = new WeatherData(city, temp, hum, windSpeed, cloudCover, dewPoint,
+                    apparentTemp, weatherCode, windGusts);
 
             welcomeText.setText("Wetter in " + city);
             updateTemperatureDisplay(temp);
-            humidity.setText("💧 " + hum + "%");
+            humidity.setText(hum + "%");
+            if (humidityBox != null) humidityBox.setVisible(true);
 
             if (clothingTip != null) clothingTip.setText(lastWeatherData.getClothingTip());
+
+            if (detailsButton != null) {
+                detailsButton.setDisable(false);
+            }
+
             historyService.saveToHistory(lastWeatherData);
 
         } else if (parts[0].equals("ERROR")) {
@@ -187,18 +215,49 @@ public class HelloController extends AbstractLogs {
         }
     }
 
+    @FXML
+    protected void onDetailsClick() {
+        if (lastWeatherData == null) {
+            welcomeText.setText("Bitte erst eine Stadt suchen!");
+            return;
+        }
+
+        String details = buildDetailsString();
+        historyArea.setText(details);
+    }
+
+    private String buildDetailsString() {
+        double tempDisplay = isFahrenheit
+            ? lastWeatherData.temperature() * 9 / 5 + 32
+            : lastWeatherData.temperature();
+        String tempUnit = isFahrenheit ? "°F" : "°C";
+
+        double apparentTempDisplay = isFahrenheit
+            ? lastWeatherData.apparentTemp() * 9 / 5 + 32
+            : lastWeatherData.apparentTemp();
+
+        double dewPointDisplay = isFahrenheit
+            ? lastWeatherData.dewPoint() * 9 / 5 + 32
+            : lastWeatherData.dewPoint();
+
+        return "Stadt: " + lastWeatherData.city() + "\n" +
+               "Wetter: " + lastWeatherData.getWeatherDescription() + "\n" +
+               "Temperatur: " + String.format("%.1f", tempDisplay) + " " + tempUnit + "\n" +
+               "Gefühlt wie: " + String.format("%.1f", apparentTempDisplay) + " " + tempUnit + "\n" +
+               "Luftfeuchtigkeit: " + lastWeatherData.humidity() + "%\n" +
+               "Taupunkt: " + String.format("%.1f", dewPointDisplay) + " " + tempUnit + "\n" +
+               "Wolkenbedeckung: " + lastWeatherData.getCloudDescription() + "\n" +
+               "Windgeschwindigkeit: " + String.format("%.1f", lastWeatherData.windSpeed()) + " km/h (" + lastWeatherData.getWindDescription() + ")\n" +
+               "Windböen: " + String.format("%.1f", lastWeatherData.windGusts()) + " km/h";
+    }
+
     private void updateTemperatureDisplay(double tempCelsius) {
         if (isFahrenheit) {
             double tempF = tempCelsius * 9 / 5 + 32;
-            temperature.setText(String.format("🌡 %.1f °F", tempF));
+            temperature.setText(String.format("%.1f °F", tempF));
         } else {
-            temperature.setText(String.format("🌡 %.1f °C", tempCelsius));
+            temperature.setText(String.format("%.1f °C", tempCelsius));
         }
     }
-
-    // Hilfsmethode: true, wenn der Stadtnamen Ziffern enthält (klarer Name, verhindert invertierte Aufrufe)
-    private boolean isCityInvalid(String city) {
-        // Gibt true zurück, wenn der String mindestens eine Ziffer enthält.
-        return city != null && city.matches(".*\\d.*");
-    }
 }
+

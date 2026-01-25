@@ -46,10 +46,11 @@ public class ClientHandler extends AbstractLogs implements Runnable {
         } catch (IOException e) {
             log("Verbindungsfehler: " + e.getMessage());
         } finally {
-            try { clientSocket.close();
+            try {
+                clientSocket.close();
             } catch (IOException e) {
-                // Auch egal. Hauptsache Socket wird geschlossen.
             }
         }
     }
 }
+

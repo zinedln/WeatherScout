@@ -102,3 +102,21 @@
     -fx-background-color: #FF9800;
 }
 
+.details-button {
+    -fx-font-size: 13px;
+    -fx-background-color: #00BCD4;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-padding: 10 20;
+    -fx-cursor: hand;
+}
+
+.details-button:hover {
+    -fx-background-color: #00ACC1;
+}
+
+.details-button:disabled {
+    -fx-background-color: #cccccc;
+    -fx-cursor: default;
+}
+

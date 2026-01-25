@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/IdeaProjects.WeatherScout.main.iml" filepath="$PROJECT_DIR$/.idea/modules/IdeaProjects.WeatherScout.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/IdeaProjects.WeatherScout.test.iml" filepath="$PROJECT_DIR$/.idea/modules/IdeaProjects.WeatherScout.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/WeatherScout.iml" filepath="$PROJECT_DIR$/.idea/modules/WeatherScout.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/WeatherScout.main.iml" filepath="$PROJECT_DIR$/.idea/modules/WeatherScout.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/WeatherScout.test.iml" filepath="$PROJECT_DIR$/.idea/modules/WeatherScout.test.iml" />
