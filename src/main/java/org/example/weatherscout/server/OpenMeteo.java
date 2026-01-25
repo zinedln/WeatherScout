@@ -1,5 +1,6 @@
 package org.example.weatherscout.server;
 
+import org.example.weatherscout.shared.WeatherException;
 import org.example.weatherscout.utils.AbstractLogs;
 
 import java.net.URI;
@@ -10,7 +11,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-public class OpenMeteo extends AbstractLogs {
+public class OpenMeteo extends AbstractLogs implements WeatherProvider {
 
     private final HttpClient httpClient;
 
@@ -23,16 +24,18 @@ public class OpenMeteo extends AbstractLogs {
         return "API";
     }
 
-    public String fetchWeatherData(String city) {
+    @Override
+    public String fetchWeatherData(String city) throws WeatherException {
         try {
             log("Suche Koordinaten für: " + city);
             double[] coords = getCoordinates(city);
 
             return fetchFromApi(city, coords[0], coords[1]);
-
+        } catch (WeatherException e) {
+            throw e;
         } catch (Exception e) {
-            log("Fehler bei API Abfrage: " + e.getMessage());
-            return "ERROR|" + e.getMessage();
+            log("Unerwarteter Fehler: " + e.getMessage());
+            throw new WeatherException("Interner API Fehler: " + e.getMessage());
         }
     }
 
@@ -43,7 +46,7 @@ public class OpenMeteo extends AbstractLogs {
         String json = sendRequest(url);
 
         if (!json.contains("\"results\"")) {
-            throw new Exception("Stadt nicht gefunden");
+            throw new WeatherException("Stadt '" + city + "' nicht gefunden");
         }
 
         double lat = extractNumber(json, "\"latitude\":");

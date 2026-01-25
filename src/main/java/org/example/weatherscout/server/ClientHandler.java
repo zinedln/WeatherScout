@@ -1,5 +1,6 @@
 package org.example.weatherscout.server;
 
+import org.example.weatherscout.shared.WeatherException;
 import org.example.weatherscout.utils.AbstractLogs;
 import java.io.*;
 import java.net.Socket;
@@ -7,9 +8,9 @@ import java.net.Socket;
 public class ClientHandler extends AbstractLogs implements Runnable {
 
     private final Socket clientSocket;
-    private final OpenMeteo apiProvider;
+    private final WeatherProvider apiProvider;
 
-    public ClientHandler(Socket socket, OpenMeteo apiProvider) {
+    public ClientHandler(Socket socket, WeatherProvider apiProvider) {
         this.clientSocket = socket;
         this.apiProvider = apiProvider;
     }
@@ -30,13 +31,16 @@ public class ClientHandler extends AbstractLogs implements Runnable {
             if (city != null) {
                 log("Anfrage erhalten: " + city);
 
-                String response = apiProvider.fetchWeatherData(city);
+                try {
+                    String response = apiProvider.fetchWeatherData(city);
 
-                writer.write(response);
+                    writer.write(response);
+                } catch (WeatherException e) {
+                    log ("Inhaltlicher Fehler: " + e.getMessage());
+                    writer.write("ERROR| " + e.getMessage());
+                }
                 writer.newLine();
                 writer.flush();
-
-                log("Antwort gesendet: " + response);
             }
 
         } catch (IOException e) {
