@@ -13,6 +13,9 @@ import org.example.weatherscout.utils.Config;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.List;
 
 public class HelloController extends AbstractLogs {
@@ -30,9 +33,7 @@ public class HelloController extends AbstractLogs {
 
     private final WeatherClient clientService;
     private final HistoryService historyService;
-
     private final ThemeManager themeManager;
-    private final DiscoveryService discoveryService;
 
     private boolean isFahrenheit = false;
     private WeatherData lastWeatherData;
@@ -40,8 +41,7 @@ public class HelloController extends AbstractLogs {
     public HelloController() {
         this.clientService = new WeatherClient();
         this.historyService = HistoryService.getInstance();
-        this.themeManager = new ThemeManager();         // Neu
-        this.discoveryService = new DiscoveryService(); // Neu
+        this.themeManager = new ThemeManager();
     }
 
     @Override
@@ -49,10 +49,6 @@ public class HelloController extends AbstractLogs {
 
     @FXML
     public void initialize() {
-        if (cityInput != null) {
-            InputValidator.attachTo(cityInput, welcomeText);
-        }
-
         String savedUnit = Config.getSetting("app.unit", "C");
         isFahrenheit = "F".equals(savedUnit);
         unitToggle.setSelected(isFahrenheit);
@@ -65,38 +61,56 @@ public class HelloController extends AbstractLogs {
             }
         });
 
-        startDiscovery();
+        sendUdpLog("Client gestartet");
     }
 
-    private void startDiscovery() {
-        Task<String> udpTask = discoveryService.createDiscoveryTask();
-        udpTask.setOnSucceeded(e -> {
-            if (udpTask.getValue() != null) log("UDP Server gefunden: " + udpTask.getValue());
-            else log("Kein UDP Server gefunden.");
-        });
-        new Thread(udpTask).start();
+    private void sendUdpLog(String message) {
+        new Thread(() -> {
+            try {
+                DatagramSocket socket = new DatagramSocket();
+                byte[] data = message.getBytes();
+                InetAddress ip = InetAddress.getByName("localhost");
+                int port = Config.getUdpPort();
+
+                DatagramPacket packet = new DatagramPacket(data, data.length, ip, port);
+                socket.send(packet);
+                socket.close();
+                log("UDP Log gesendet: " + message);
+            } catch (Exception e) {
+                log("UDP Fehler: " + e.getMessage());
+            }
+        }).start();
     }
 
     @FXML
     protected void onHelloButtonClick() {
-        String city = cityInput.getText().trim();
+        String city = cityInput.getText();
 
-        if (city.isEmpty()) {
+        if (city == null || city.trim().isEmpty()) {
             welcomeText.setText("Bitte Stadt eingeben!");
+            cityInput.setStyle("-fx-border-color: red;");
             return;
         }
 
-        if (!InputValidator.isValid(city)) {
-            cityInput.requestFocus();
+        // Regex Prüfung: Nur Buchstaben und Bindestrich
+        if (!city.matches("[a-zA-ZäöüßÄÖÜ\\s-]+")) {
+            welcomeText.setText("Ungültige Zeichen!");
+            cityInput.setStyle("-fx-border-color: red;");
             return;
         }
 
+        cityInput.setStyle("");
+        // ---------------------------------------------
+
+        // GUI Reset
         welcomeText.setText("Lade Daten...");
         temperature.setText("");
         humidity.setText("");
         if (humidityBox != null) humidityBox.setVisible(false);
         if (clothingTip != null) clothingTip.setText("");
         if (detailsButton != null) detailsButton.setDisable(true);
+
+        sendUdpLog("Frage Wetter ab für: " + city);
 
         Task<String> weatherTask = createWeatherTask(city);
         new Thread(weatherTask).start();
@@ -124,9 +138,8 @@ public class HelloController extends AbstractLogs {
         });
 
         weatherTask.setOnFailed(e -> {
-            Throwable error = weatherTask.getException();
             welcomeText.setText("Verbindungsfehler!");
-            log("Fehler: " + error.getMessage());
+            log("Fehler: " + weatherTask.getException().getMessage());
         });
         return weatherTask;
     }
@@ -149,7 +162,6 @@ public class HelloController extends AbstractLogs {
             if (detailsButton != null) detailsButton.setDisable(false);
 
             checkUserWarning(lastWeatherData.temperature());
-
             historyService.saveToHistory(lastWeatherData);
         } else {
             welcomeText.setText("Ungültige Daten empfangen.");
@@ -195,7 +207,6 @@ public class HelloController extends AbstractLogs {
         alert.setContentText(msg);
         alert.show();
     }
-
 
     @FXML
     protected void onShowHistoryClick() {

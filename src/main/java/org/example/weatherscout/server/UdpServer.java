@@ -2,7 +2,6 @@ package org.example.weatherscout.server;
 
 import org.example.weatherscout.utils.AbstractLogs;
 import org.example.weatherscout.utils.Config;
-
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
@@ -10,32 +9,23 @@ public class UdpServer extends AbstractLogs implements Runnable {
     private final int port = Config.getUdpPort();
 
     @Override
-    protected String getPrefix() {
-        return "UDP-Server";
-    }
+    protected String getPrefix() { return "UDP"; }
 
     @Override
     public void run() {
         try (DatagramSocket socket = new DatagramSocket(port)) {
-            log("UDP Listener gestartet auf Port " + port);
-            byte[] buf = new byte[256];
+            log("Log-Server gestartet auf Port " + port);
+            byte[] buf = new byte[1024];
 
             while (true) {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
 
-                String received = new String(packet.getData(), 0, packet.getLength());
-                log("Empfangen: " + received);
-
-                if ("DISCOVER".equals(received.trim())) {
-                    String response = "WEATHERSCOUT_ALIVE|" + Config.getPort();
-                    byte[] sendBuf = response.getBytes();
-                    DatagramPacket responsePacket = new DatagramPacket(sendBuf, sendBuf.length, packet.getAddress(), packet.getPort());
-                    socket.send(responsePacket);
-                }
+                String message = new String(packet.getData(), 0, packet.getLength());
+                log("Empfangen von " + packet.getAddress() + ": " + message);
             }
         } catch (Exception e) {
-            log("UDP Fehler: " + e.getMessage());
+            log("Fehler: " + e.getMessage());
         }
     }
 }
