@@ -4,3 +4,13 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
+# History and export files
+weather_history.txt
+weather_history.csv
+
+# Configuration with potential sensitive data
+config.properties
+
+# IDE specific files
+.idea/
+*.iml

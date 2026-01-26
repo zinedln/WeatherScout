@@ -2,7 +2,7 @@ plugins {
     java
     application
     // id("org.javamodularity.moduleplugin") version "1.8.13"
-    id("org.openjfx.javafxplugin") version "0.0.13"
+    id("org.openjfx.javafxplugin") version "0.1.0"
     id("org.beryx.jlink") version "2.25.0"
 }
 

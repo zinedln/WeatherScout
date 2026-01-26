@@ -1,14 +1,8 @@
 Timestamp;Stadt;Wetter;Temperatur;Gefuehlt;Luftfeuchtigkeit;Taupunkt;Wolkenbedeckung;Windgeschwindigkeit;Windboeen
-25.01.2026 19:24;pound town;Bedeckt;'6.6;'2.7;85%;'4.3;Bedeckt;17.3 km/h (Frischer Wind);31.3 km/h;
-25.01.2026 20:01;wien;Nieselregen;'3.3;'-0.2;95%;'2.5;Bedeckt;12.0 km/h (Frischer Wind);26.6 km/h;
-26.01.2026 00:54;Wien;Bedeckt;'3.3;'1.0;97%;'2.8;Bedeckt;4.2 km/h (Leichter Wind);19.8 km/h;
-26.01.2026 00:54;Istanbul;Bedeckt;'11.3;'10.3;80%;'7.9;Bedeckt;2.6 km/h (Leichter Wind);3.2 km/h;
-26.01.2026 00:54;Salzburg;Schneeschauer;'-0.7;'-3.2;90%;'-2.2;Bedeckt;0.4 km/h (Windstille);6.8 km/h;
-26.01.2026 01:00;Wien;Bedeckt;'3.2;'0.7;97%;'2.8;Bedeckt;5.7 km/h (Mäßiger Wind);19.8 km/h;
-26.01.2026 01:00;Istanbul;Bedeckt;'11.2;'10.3;82%;'8.2;Bedeckt;2.3 km/h (Leichter Wind);2.9 km/h;
-26.01.2026 01:00;Salzburg;Überwiegend klar;'-0.8;'-3.5;90%;'-2.3;Bedeckt;1.3 km/h (Windstille);6.5 km/h;
-26.01.2026 01:09;Wien;Bedeckt;'3.2;'0.7;97%;'2.8;Bedeckt;5.7 km/h (Mäßiger Wind);19.8 km/h;
-26.01.2026 01:09;Istanbul;Bedeckt;'11.2;'10.3;82%;'8.2;Bedeckt;2.3 km/h (Leichter Wind);2.9 km/h;
-26.01.2026 01:09;Tel Aviv;Überwiegend klar;'11.6;'9.9;65%;'5.2;Klar;4.0 km/h (Leichter Wind);6.8 km/h;
-26.01.2026 01:10;Nevsehir;Bedeckt;'4.3;'0.8;73%;'-0.2;Bedeckt;8.7 km/h (Mäßiger Wind);22.7 km/h;
-26.01.2026 01:10;Kayseri;Überwiegend klar;'0.1;'-2.7;92%;'-1.0;Bedeckt;4.0 km/h (Leichter Wind);3.2 km/h;
+26.01.2026 15:52;Wien;Bedeckt;'5.8;'3.6;81%;'2.8;Bedeckt;3.8 km/h (Leichter Wind);9.7 km/h;
+26.01.2026 15:53;Berlin;Bedeckt;'0.2;'-3.6;88%;'-1.5;Bedeckt;10.4 km/h (Mäßiger Wind);23.0 km/h;
+26.01.2026 15:53;Prag;Bedeckt;'4.9;'1.3;72%;'0.3;Bedeckt;10.5 km/h (Mäßiger Wind);23.4 km/h;
+26.01.2026 15:53;Bratislava;Überwiegend klar;'5.1;'3.2;84%;'2.6;Überwiegend bewölkt;1.8 km/h (Windstille);4.7 km/h;
+26.01.2026 15:53;Kopenhagen;Bedeckt;'-0.0;'-6.1;77%;'-3.6;Bedeckt;23.4 km/h (Starker Wind);44.6 km/h;
+26.01.2026 15:53;Madrid;Regen;'8.9;'7.5;92%;'7.6;Bedeckt;5.2 km/h (Mäßiger Wind);16.2 km/h;
+26.01.2026 15:53;Amman;Bedeckt;'15.8;'11.6;31%;'-1.3;Bedeckt;12.9 km/h (Frischer Wind);38.5 km/h;
