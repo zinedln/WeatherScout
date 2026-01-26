@@ -199,6 +199,28 @@ public class HelloController extends AbstractLogs {
             return;
         }
 
+        lastWeatherData = parseServerResponse(response);
+
+        if (lastWeatherData != null) {
+            welcomeText.setText("Wetter in " + lastWeatherData.city());
+            updateTemperatureDisplay(lastWeatherData.temperature());
+            humidity.setText(lastWeatherData.humidity() + "%");
+            if (humidityBox != null) humidityBox.setVisible(true);
+
+            if (clothingTip != null) clothingTip.setText(lastWeatherData.getClothingTip());
+
+            if (detailsButton != null) {
+                detailsButton.setDisable(false);
+            }
+
+            historyService.saveToHistory(lastWeatherData);
+
+        } else {
+            welcomeText.setText("Ungültige Daten empfangen.");
+        }
+    }
+
+    private WeatherData parseServerResponse(String response) {
         String[] parts = response.split("\\|");
 
         if (parts.length >= 4 && parts[0].equals("OK")) {
@@ -213,26 +235,10 @@ public class HelloController extends AbstractLogs {
             int cloudCover = parts.length > 8 ? Integer.parseInt(parts[8]) : 0;
             double dewPoint = parts.length > 9 ? Double.parseDouble(parts[9]) : 0;
 
-            lastWeatherData = new WeatherData(city, temp, hum, windSpeed, cloudCover, dewPoint,
+            return new WeatherData(city, temp, hum, windSpeed, cloudCover, dewPoint,
                     apparentTemp, weatherCode, windGusts);
-
-            welcomeText.setText("Wetter in " + city);
-            updateTemperatureDisplay(temp);
-            humidity.setText(hum + "%");
-            if (humidityBox != null) humidityBox.setVisible(true);
-
-            if (clothingTip != null) clothingTip.setText(lastWeatherData.getClothingTip());
-
-            if (detailsButton != null) {
-                detailsButton.setDisable(false);
-            }
-
-            historyService.saveToHistory(lastWeatherData);
-
-        } else if (parts[0].equals("ERROR")) {
-            welcomeText.setText("Fehler: " + (parts.length > 1 ? parts[1] : "Unbekannt"));
         } else {
-            welcomeText.setText("Ungültige Daten empfangen.");
+            return null;
         }
     }
 
@@ -253,88 +259,13 @@ public class HelloController extends AbstractLogs {
             return;
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(input));
-             FileWriter fw = new FileWriter(output);
-             BufferedWriter bw = new BufferedWriter(fw)) {
-
-            // Header (einfach generisch)
-            bw.write("Timestamp;Stadt;Wetter;Temperatur;Gefuehlt;Luftfeuchtigkeit;Taupunkt;Wolkenbedeckung;Windgeschwindigkeit;Windboeen");
-            bw.newLine();
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                // Zeilen sind im Format: timestamp | Stadt: X | Wetter: Y | Temperatur: Z°C | Gefühlt wie: A°C | Luftfeuchtigkeit: B% | ...
-                String[] parts = line.split("\\s\\|\\s");
-                List<String> columns = new ArrayList<>();
-
-                // erste Spalte: timestamp
-                String ts = "";
-                if (parts.length > 0 && parts[0] != null) {
-                    String raw = parts[0].trim();
-                    if (raw.isEmpty() || "###".equals(raw)) {
-                        ts = LocalDateTime.now().format(HISTORY_TS_FORMATTER);
-                    } else {
-                        ts = raw;
-                    }
-                } else {
-                    ts = LocalDateTime.now().format(HISTORY_TS_FORMATTER);
-                }
-                columns.add(csvEscape(ts));
-
-                // Für die weiteren erwarteten Felder extrahiere den Teil nach ': ' falls vorhanden
-                for (int i = 1; i < Math.min(parts.length, 11); i++) {
-                    String p = parts[i];
-                    int idx = p.indexOf(":");
-                    String value = (idx >= 0 && idx + 1 < p.length()) ? p.substring(idx + 1).trim() : p.trim();
-                    // Spezielle Behandlung je Spalte:
-                    // i==3 -> Temperatur, i==4 -> Gefuehlt, i==5 -> Luftfeuchtigkeit, i==6 -> Taupunkt
-                    // Konvertiere Dezimalkommas zu Dezimalpunkten, z.B. "3,3" -> "3.3"
-                    value = value.replaceAll("(\\d),(\\d)", "$1.$2");
-                    if (i == 5) {
-                        // Luftfeuchte: behalte das Prozentzeichen (falls vorhanden)
-                        value = value.replace("°C", "").trim();
-                        columns.add(csvEscape(value));
-                    } else if (i == 3 || i == 4 || i == 6) {
-                        // Temperatur/Gefuehlt/Taupunkt: entferne Einheiten und schreibe als reiner Text
-                        value = value.replace("°C", "").replace("%", "").trim();
-                        if (value.isEmpty()) {
-                            columns.add(csvEscape(""));
-                        } else {
-                            // Führendes Apostroph zwingt Excel, das Feld als Text darzustellen (sieht der Nutzer nicht)
-                            String forced = "'" + value;
-                            columns.add(csvEscape(forced));
-                        }
-                    } else {
-                        // Standardfall: entferne Einheiten
-                        value = value.replace("°C", "").replace("%", "").trim();
-                        columns.add(csvEscape(value));
-                    }
-                }
-
-                // Falls weniger Spalten vorhanden sind, fülle leere
-                while (columns.size() < 11) columns.add("");
-
-                bw.write(String.join(";", columns));
-                bw.newLine();
-            }
-
+        try {
+            historyService.exportToCsv(output);
             welcomeText.setText("Export erfolgreich: " + output.getName());
-
         } catch (IOException e) {
             welcomeText.setText("Fehler beim Export: " + e.getMessage());
             log("Export-Fehler: " + e.getMessage());
         }
-    }
-
-    // Hilfsmethode: um CSV-Felder sicher zu escapen
-    private String csvEscape(String s) {
-        if (s == null) return "";
-        String value = s.replace("\"", "\"\"");
-        // Felder quote, wenn sie Semikolon, Anführungszeichen oder Zeilenumbruch enthalten
-        if (value.contains(";") || value.contains("\"") || value.contains("\n")) {
-            return "\"" + value + "\"";
-        }
-        return value;
     }
 
     @FXML

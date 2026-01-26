@@ -81,5 +81,93 @@ public class HistoryService {
             file.delete();
         }
     }
-}
 
+    // Exportiert die gespeicherte Historie in eine CSV-Datei. Werfe IOException an den Aufrufer,
+    // damit die UI geeignete Meldungen anzeigen kann.
+    public void exportToCsv(File output) throws IOException {
+        File input = new File(historyFile);
+        File parent = input.getAbsoluteFile().getParentFile();
+
+        if (!input.exists()) {
+            throw new FileNotFoundException("Keine Historie zum Exportieren.");
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(input));
+             FileWriter fw = new FileWriter(output);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+
+            // Header (einfach generisch)
+            bw.write("Timestamp;Stadt;Wetter;Temperatur;Gefuehlt;Luftfeuchtigkeit;Taupunkt;Wolkenbedeckung;Windgeschwindigkeit;Windboeen");
+            bw.newLine();
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split("\\s\\|\\s");
+                List<String> columns = new ArrayList<>();
+
+                // erste Spalte: timestamp
+                String ts = "";
+                if (parts.length > 0 && parts[0] != null) {
+                    String raw = parts[0].trim();
+                    if (raw.isEmpty() || "###".equals(raw)) {
+                        ts = LocalDateTime.now().format(formatter);
+                    } else {
+                        ts = raw;
+                    }
+                } else {
+                    ts = LocalDateTime.now().format(formatter);
+                }
+                columns.add(csvEscape(ts));
+
+                // Für die weiteren erwarteten Felder extrahiere den Teil nach ': ' falls vorhanden
+                for (int i = 1; i < Math.min(parts.length, 11); i++) {
+                    String p = parts[i];
+                    int idx = p.indexOf(":");
+                    String value = (idx >= 0 && idx + 1 < p.length()) ? p.substring(idx + 1).trim() : p.trim();
+                    // Spezielle Behandlung je Spalte:
+                    // i==3 -> Temperatur, i==4 -> Gefuehlt, i==5 -> Luftfeuchtigkeit, i==6 -> Taupunkt
+                    // Konvertiere Dezimalkommas zu Dezimalpunkten, z.B. "3,3" -> "3.3"
+                    value = value.replaceAll("(\\d),(\\d)", "$1.$2");
+                    if (i == 5) {
+                        // Luftfeuchte: behalte das Prozentzeichen (falls vorhanden)
+                        value = value.replace("°C", "").trim();
+                        columns.add(csvEscape(value));
+                    } else if (i == 3 || i == 4 || i == 6) {
+                        // Temperatur/Gefuehlt/Taupunkt: entferne Einheiten und schreibe als reiner Text
+                        value = value.replace("°C", "").replace("%", "").trim();
+                        if (value.isEmpty()) {
+                            columns.add(csvEscape(""));
+                        } else {
+                            // Führendes Apostroph zwingt Excel, das Feld als Text darzustellen
+                            String forced = "'" + value;
+                            columns.add(csvEscape(forced));
+                        }
+                    } else {
+                        // Standardfall: entferne Einheiten
+                        value = value.replace("°C", "").replace("%", "").trim();
+                        columns.add(csvEscape(value));
+                    }
+                }
+
+                // Falls weniger Spalten vorhanden sind, fülle leere
+                while (columns.size() < 11) columns.add("");
+
+                bw.write(String.join(";", columns));
+                bw.newLine();
+            }
+
+            bw.flush();
+        }
+    }
+
+    // Hilfsmethode: um CSV-Felder sicher zu escapen
+    private String csvEscape(String s) {
+        if (s == null) return "";
+        String value = s.replace("\"", "\"\"");
+        // Felder quote, wenn sie Semikolon, Anführungszeichen oder Zeilenumbruch enthalten
+        if (value.contains(";") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value + "\"";
+        }
+        return value;
+    }
+}
