@@ -8,6 +8,12 @@ import javafx.scene.layout.HBox;
 import org.example.weatherscout.shared.WeatherData;
 import org.example.weatherscout.utils.AbstractLogs;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 public class HelloController extends AbstractLogs {
 
     @FXML private TextField cityInput;
@@ -38,6 +44,8 @@ public class HelloController extends AbstractLogs {
     };
 
     private static final String VALIDATION_ERROR = "Fehler: Nur Buchstaben, Leerzeichen und Bindestriche erlaubt.";
+    private static final DateTimeFormatter HISTORY_TS_FORMATTER =
+            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public HelloController() {
         this.clientService = new WeatherClient();
@@ -145,12 +153,16 @@ public class HelloController extends AbstractLogs {
 
     public void changeTheme() {
         currentTheme = (currentTheme + 1) % THEMES.length;
-        String cssResource = getClass().getResource("/org/example/weatherscout/" + THEMES[currentTheme]).toExternalForm();
-
-        Scene scene = temperature.getScene();
-        if (scene != null) {
-            scene.getStylesheets().clear();
-            scene.getStylesheets().add(cssResource);
+        java.net.URL res = getClass().getResource("/org/example/weatherscout/" + THEMES[currentTheme]);
+        if (res != null) {
+            String cssResource = res.toExternalForm();
+            Scene scene = temperature.getScene();
+            if (scene != null) {
+                scene.getStylesheets().clear();
+                scene.getStylesheets().add(cssResource);
+            }
+        } else {
+            log("Theme resource nicht gefunden: " + THEMES[currentTheme]);
         }
 
         if (themeButton != null) {
@@ -227,6 +239,102 @@ public class HelloController extends AbstractLogs {
     @FXML
     protected void onShowHistoryClick() {
         historyArea.setText(String.join("\n", historyService.loadHistory()));
+    }
+
+    @FXML
+    protected void onExportHistoryCsv() {
+        String historyFile = org.example.weatherscout.utils.Config.getHistoryFile();
+        File input = new File(historyFile);
+        File parent = input.getAbsoluteFile().getParentFile();
+        File output = (parent != null) ? new File(parent, "weather_history.csv") : new File("weather_history.csv");
+
+        if (!input.exists()) {
+            welcomeText.setText("Keine Historie zum Exportieren.");
+            return;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(input));
+             FileWriter fw = new FileWriter(output);
+             BufferedWriter bw = new BufferedWriter(fw)) {
+
+            // Header (einfach generisch)
+            bw.write("Timestamp;Stadt;Wetter;Temperatur;Gefuehlt;Luftfeuchtigkeit;Taupunkt;Wolkenbedeckung;Windgeschwindigkeit;Windboeen");
+            bw.newLine();
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                // Zeilen sind im Format: timestamp | Stadt: X | Wetter: Y | Temperatur: Z°C | Gefühlt wie: A°C | Luftfeuchtigkeit: B% | ...
+                String[] parts = line.split("\\s\\|\\s");
+                List<String> columns = new ArrayList<>();
+
+                // erste Spalte: timestamp
+                String ts = "";
+                if (parts.length > 0 && parts[0] != null) {
+                    String raw = parts[0].trim();
+                    if (raw.isEmpty() || "###".equals(raw)) {
+                        ts = LocalDateTime.now().format(HISTORY_TS_FORMATTER);
+                    } else {
+                        ts = raw;
+                    }
+                } else {
+                    ts = LocalDateTime.now().format(HISTORY_TS_FORMATTER);
+                }
+                columns.add(csvEscape(ts));
+
+                // Für die weiteren erwarteten Felder extrahiere den Teil nach ': ' falls vorhanden
+                for (int i = 1; i < Math.min(parts.length, 11); i++) {
+                    String p = parts[i];
+                    int idx = p.indexOf(":");
+                    String value = (idx >= 0 && idx + 1 < p.length()) ? p.substring(idx + 1).trim() : p.trim();
+                    // Spezielle Behandlung je Spalte:
+                    // i==3 -> Temperatur, i==4 -> Gefuehlt, i==5 -> Luftfeuchtigkeit, i==6 -> Taupunkt
+                    // Konvertiere Dezimalkommas zu Dezimalpunkten, z.B. "3,3" -> "3.3"
+                    value = value.replaceAll("(\\d),(\\d)", "$1.$2");
+                    if (i == 5) {
+                        // Luftfeuchte: behalte das Prozentzeichen (falls vorhanden)
+                        value = value.replace("°C", "").trim();
+                        columns.add(csvEscape(value));
+                    } else if (i == 3 || i == 4 || i == 6) {
+                        // Temperatur/Gefuehlt/Taupunkt: entferne Einheiten und schreibe als reiner Text
+                        value = value.replace("°C", "").replace("%", "").trim();
+                        if (value.isEmpty()) {
+                            columns.add(csvEscape(""));
+                        } else {
+                            // Führendes Apostroph zwingt Excel, das Feld als Text darzustellen (sieht der Nutzer nicht)
+                            String forced = "'" + value;
+                            columns.add(csvEscape(forced));
+                        }
+                    } else {
+                        // Standardfall: entferne Einheiten
+                        value = value.replace("°C", "").replace("%", "").trim();
+                        columns.add(csvEscape(value));
+                    }
+                }
+
+                // Falls weniger Spalten vorhanden sind, fülle leere
+                while (columns.size() < 11) columns.add("");
+
+                bw.write(String.join(";", columns));
+                bw.newLine();
+            }
+
+            welcomeText.setText("Export erfolgreich: " + output.getName());
+
+        } catch (IOException e) {
+            welcomeText.setText("Fehler beim Export: " + e.getMessage());
+            log("Export-Fehler: " + e.getMessage());
+        }
+    }
+
+    // Hilfsmethode: um CSV-Felder sicher zu escapen
+    private String csvEscape(String s) {
+        if (s == null) return "";
+        String value = s.replace("\"", "\"\"");
+        // Felder quote, wenn sie Semikolon, Anführungszeichen oder Zeilenumbruch enthalten
+        if (value.contains(";") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value + "\"";
+        }
+        return value;
     }
 
     @FXML

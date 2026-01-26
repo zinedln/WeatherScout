@@ -40,7 +40,7 @@
 
     <HBox alignment="CENTER" spacing="10.0">
         <Button onAction="#onShowHistoryClick" prefHeight="33.0" prefWidth="130.0" styleClass="history-button" text="HistoryAnzeigen" textAlignment="CENTER" />
-        <Button styleClass="export-button" text="HistoryExportAlsCSV" textAlignment="CENTER" />
+        <Button fx:id="exportCsvButton" onAction="#onExportHistoryCsv" styleClass="export-button" text="HistoryExportAlsCSV" textAlignment="CENTER" />
         <Button fx:id="detailsButton" onAction="#onDetailsClick" styleClass="details-button" text="Detailansicht" textAlignment="CENTER" />
         <Button onAction="#onClearHistoryClick" styleClass="clear-button" text="HistoryLöschen" textAlignment="CENTER" />
     </HBox>
