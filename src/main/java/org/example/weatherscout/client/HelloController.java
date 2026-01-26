@@ -7,11 +7,13 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import org.example.weatherscout.shared.WeatherData;
 import org.example.weatherscout.utils.AbstractLogs;
+import org.example.weatherscout.utils.Config;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.util.List;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class HelloController extends AbstractLogs {
@@ -61,6 +63,25 @@ public class HelloController extends AbstractLogs {
     public void initialize() {
         setupCityValidation();
 
+        String savedTheme = Config.getSetting("app.theme", "0");
+        String savedUnit = Config.getSetting("app.unit", "C");
+
+        try {
+            currentTheme = Integer.parseInt(savedTheme);
+            if (currentTheme < 0 || currentTheme >= THEMES.length) currentTheme = 0;
+        } catch (NumberFormatException e) {
+            currentTheme = 0;
+        }
+
+        isFahrenheit = "F".equals(savedUnit);
+        unitToggle.setSelected(isFahrenheit);
+        unitToggle.setText(isFahrenheit ? "°F" : "°C");
+
+        javafx.application.Platform.runLater(this::applyTheme);
+
+        discoverServer();
+    }
+    /*
         HistoryService s1 = HistoryService.getInstance();
         HistoryService s2 = HistoryService.getInstance();
 
@@ -73,6 +94,34 @@ public class HelloController extends AbstractLogs {
         else {
             log("FEHLER: Es sind unterschiedliche/mehrere Instanzen!");
         }
+    }
+    */
+
+    private void discoverServer() {
+        Task<String> udpTask = new Task<>() {
+            @Override
+            protected String call() throws Exception {
+                try (DatagramSocket socket = new DatagramSocket()) {
+                    socket.setSoTimeout(2000);
+                    byte[] buf = "DISCOVER".getBytes();
+                    InetAddress address = InetAddress.getByName("localhost");
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length, address, Config.getUdpPort());
+                    socket.send(packet);
+
+                    byte[] recBuf = new byte[256];
+                    DatagramPacket response = new DatagramPacket(recBuf, recBuf.length);
+                    socket.receive(response);
+                    return new String(response.getData(), 0, response.getLength());
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        };
+        udpTask.setOnSucceeded(e -> {
+            if (udpTask.getValue() != null) log("UDP Server gefunden: " + udpTask.getValue());
+            else log("Kein UDP Server gefunden.");
+        });
+        new Thread(udpTask).start();
     }
 
     private void setupCityValidation() {
@@ -151,12 +200,21 @@ public class HelloController extends AbstractLogs {
         return city.matches(".*[a-zA-ZäöüßÄÖÜ].*");
     }
 
+    @FXML
     public void changeTheme() {
         currentTheme = (currentTheme + 1) % THEMES.length;
+        applyTheme();
+
+        Config.saveSetting("app.theme", String.valueOf(currentTheme));
+    }
+
+    private void applyTheme() {
+        if (themeButton == null || themeButton.getScene() == null) return;
+
         java.net.URL res = getClass().getResource("/org/example/weatherscout/" + THEMES[currentTheme]);
         if (res != null) {
             String cssResource = res.toExternalForm();
-            Scene scene = temperature.getScene();
+            Scene scene = themeButton.getScene();
             if (scene != null) {
                 scene.getStylesheets().clear();
                 scene.getStylesheets().add(cssResource);
@@ -213,10 +271,27 @@ public class HelloController extends AbstractLogs {
                 detailsButton.setDisable(false);
             }
 
+            checkUserWarning(lastWeatherData.temperature());
             historyService.saveToHistory(lastWeatherData);
 
         } else {
             welcomeText.setText("Ungültige Daten empfangen.");
+        }
+    }
+
+    private void checkUserWarning(double temp) {
+        if (temp > 30.0) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Hitzewarnung");
+            alert.setHeaderText("Achtung: Sehr hohe Temperaturen!");
+            alert.setContentText("Es sind über 30°C. Trinken Sie genug Wasser.");
+            alert.show();
+        } else if (temp < -5.0) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Kältewarnung");
+            alert.setHeaderText("Achtung: Frostgefahr!");
+            alert.setContentText("Es ist extrem kalt. Achten Sie auf Glatteis.");
+            alert.show();
         }
     }
 
@@ -244,7 +319,26 @@ public class HelloController extends AbstractLogs {
 
     @FXML
     protected void onShowHistoryClick() {
-        historyArea.setText(String.join("\n", historyService.loadHistory()));
+        historyArea.setText("Lade History...");
+
+        Task<List<String>> historyTask = new Task<>() {
+            @Override
+            protected List<String> call() throws Exception {
+                return historyService.loadHistory();
+            }
+        };
+
+        historyTask.setOnSucceeded(e -> {
+            List<String> history = historyTask.getValue();
+            historyArea.setText(String.join("\n", history));
+        });
+
+        historyTask.setOnFailed(e -> {
+            historyArea.setText("Fehler beim Laden der History.");
+            log("Fehler beim Laden der History: " + historyTask.getException());
+        });
+
+        new Thread(historyTask).start();
     }
 
     @FXML
@@ -282,6 +376,8 @@ public class HelloController extends AbstractLogs {
         if (lastWeatherData != null) {
             updateTemperatureDisplay(lastWeatherData.temperature());
         }
+
+        Config.saveSetting("app.unit", isFahrenheit ? "F" : "C");
     }
 
     @FXML

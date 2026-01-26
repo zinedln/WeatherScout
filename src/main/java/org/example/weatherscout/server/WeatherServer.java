@@ -24,6 +24,8 @@ public class WeatherServer extends AbstractLogs {
     public void start() {
         log("Server gestartet auf Port " + PORT);
 
+        new Thread(new UdpServer()).start();
+
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
