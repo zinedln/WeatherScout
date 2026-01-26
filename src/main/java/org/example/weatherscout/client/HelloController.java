@@ -2,19 +2,18 @@ package org.example.weatherscout.client;
 
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+
 import org.example.weatherscout.shared.WeatherData;
 import org.example.weatherscout.utils.AbstractLogs;
 import org.example.weatherscout.utils.Config;
 
-import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
-import java.time.format.DateTimeFormatter;
 
 public class HelloController extends AbstractLogs {
 
@@ -31,136 +30,51 @@ public class HelloController extends AbstractLogs {
 
     private final WeatherClient clientService;
     private final HistoryService historyService;
+
+    private final ThemeManager themeManager;
+    private final DiscoveryService discoveryService;
+
     private boolean isFahrenheit = false;
     private WeatherData lastWeatherData;
-    private int currentTheme = 0;
-    private static final String[] THEMES = {
-        "normal-theme.css",
-        "dark-theme.css",
-        "christmas-theme.css",
-        "halloween-theme.css",
-        "lgbtq-theme.css"
-    };
-    private static final String[] THEME_NAMES = {
-        "Normal", "Dark", "Christmas", "Halloween", "LGBTQ"
-    };
-
-    private static final String VALIDATION_ERROR = "Fehler: Nur Buchstaben, Leerzeichen und Bindestriche erlaubt.";
-    private static final DateTimeFormatter HISTORY_TS_FORMATTER =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
     public HelloController() {
         this.clientService = new WeatherClient();
         this.historyService = HistoryService.getInstance();
+        this.themeManager = new ThemeManager();         // Neu
+        this.discoveryService = new DiscoveryService(); // Neu
     }
 
     @Override
-    protected String getPrefix() {
-        return "GUI";
-    }
+    protected String getPrefix() { return "GUI"; }
 
     @FXML
     public void initialize() {
-        setupCityValidation();
-
-        String savedTheme = Config.getSetting("app.theme", "0");
-        String savedUnit = Config.getSetting("app.unit", "C");
-
-        try {
-            currentTheme = Integer.parseInt(savedTheme);
-            if (currentTheme < 0 || currentTheme >= THEMES.length) currentTheme = 0;
-        } catch (NumberFormatException e) {
-            currentTheme = 0;
+        if (cityInput != null) {
+            InputValidator.attachTo(cityInput, welcomeText);
         }
 
+        String savedUnit = Config.getSetting("app.unit", "C");
         isFahrenheit = "F".equals(savedUnit);
         unitToggle.setSelected(isFahrenheit);
         unitToggle.setText(isFahrenheit ? "°F" : "°C");
 
-        javafx.application.Platform.runLater(this::applyTheme);
-
-        discoverServer();
-    }
-    /*
-        HistoryService s1 = HistoryService.getInstance();
-        HistoryService s2 = HistoryService.getInstance();
-
-        log("Test Instanz 1: " + s1.toString());
-        log("Test Instanz 2: " + s2.toString());
-
-        if (s1 == s2) {
-            log("ERFOLG: Es ist dieselbe Instanz. Singleton funktioniert.");
-        }
-        else {
-            log("FEHLER: Es sind unterschiedliche/mehrere Instanzen!");
-        }
-    }
-    */
-
-    private void discoverServer() {
-        Task<String> udpTask = new Task<>() {
-            @Override
-            protected String call() throws Exception {
-                try (DatagramSocket socket = new DatagramSocket()) {
-                    socket.setSoTimeout(2000);
-                    byte[] buf = "DISCOVER".getBytes();
-                    InetAddress address = InetAddress.getByName("localhost");
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length, address, Config.getUdpPort());
-                    socket.send(packet);
-
-                    byte[] recBuf = new byte[256];
-                    DatagramPacket response = new DatagramPacket(recBuf, recBuf.length);
-                    socket.receive(response);
-                    return new String(response.getData(), 0, response.getLength());
-                } catch (Exception e) {
-                    return null;
-                }
+        javafx.application.Platform.runLater(() -> {
+            if (themeButton != null && themeButton.getScene() != null) {
+                themeManager.applyCurrentTheme(themeButton.getScene());
+                themeButton.setText(themeManager.getCurrentThemeName());
             }
-        };
+        });
+
+        startDiscovery();
+    }
+
+    private void startDiscovery() {
+        Task<String> udpTask = discoveryService.createDiscoveryTask();
         udpTask.setOnSucceeded(e -> {
             if (udpTask.getValue() != null) log("UDP Server gefunden: " + udpTask.getValue());
             else log("Kein UDP Server gefunden.");
         });
         new Thread(udpTask).start();
-    }
-
-    private void setupCityValidation() {
-        if (cityInput == null) return;
-
-        cityInput.setTextFormatter(new TextFormatter<String>(change -> {
-            if (!isValidInput(change.getText())) {
-                showValidationError();
-                return null;
-            }
-            clearValidationError();
-            return change;
-        }));
-
-        cityInput.textProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal == null) return;
-            if (!isValidInput(newVal)) {
-                showValidationError();
-            } else {
-                clearValidationError();
-            }
-        });
-    }
-
-    private boolean isValidInput(String input) {
-        if (input == null || input.isEmpty()) return true;
-        return input.matches("[a-zA-ZäöüßÄÖÜ\\s-]*");
-    }
-
-    private void showValidationError() {
-        welcomeText.setText(VALIDATION_ERROR);
-        cityInput.setStyle("-fx-border-color: #b83535; -fx-border-width: 1;");
-    }
-
-    private void clearValidationError() {
-        if (VALIDATION_ERROR.equals(welcomeText.getText())) {
-            welcomeText.setText("");
-        }
-        cityInput.setStyle("");
     }
 
     @FXML
@@ -172,10 +86,8 @@ public class HelloController extends AbstractLogs {
             return;
         }
 
-        if (!isCityValid(city)) {
-            welcomeText.setText(VALIDATION_ERROR);
+        if (!InputValidator.isValid(city)) {
             cityInput.requestFocus();
-            cityInput.selectAll();
             return;
         }
 
@@ -190,44 +102,12 @@ public class HelloController extends AbstractLogs {
         new Thread(weatherTask).start();
     }
 
-    private boolean isCityValid(String city) {
-        if (city == null || city.isEmpty()) {
-            return false;
-        }
-        if (!city.matches("[a-zA-ZäöüßÄÖÜ\\s-]*")) {
-            return false;
-        }
-        return city.matches(".*[a-zA-ZäöüßÄÖÜ].*");
-    }
-
     @FXML
     public void changeTheme() {
-        currentTheme = (currentTheme + 1) % THEMES.length;
-        applyTheme();
-
-        Config.saveSetting("app.theme", String.valueOf(currentTheme));
-    }
-
-    private void applyTheme() {
-        if (themeButton == null || themeButton.getScene() == null) return;
-
-        java.net.URL res = getClass().getResource("/org/example/weatherscout/" + THEMES[currentTheme]);
-        if (res != null) {
-            String cssResource = res.toExternalForm();
-            Scene scene = themeButton.getScene();
-            if (scene != null) {
-                scene.getStylesheets().clear();
-                scene.getStylesheets().add(cssResource);
-            }
-        } else {
-            log("Theme resource nicht gefunden: " + THEMES[currentTheme]);
+        if (themeButton != null && themeButton.getScene() != null) {
+            themeManager.cycleTheme(themeButton.getScene());
+            themeButton.setText(themeManager.getCurrentThemeName());
         }
-
-        if (themeButton != null) {
-            themeButton.setText(THEME_NAMES[currentTheme]);
-        }
-
-        log("Theme gewechselt zu: " + THEME_NAMES[currentTheme]);
     }
 
     private Task<String> createWeatherTask(String city) {
@@ -263,35 +143,16 @@ public class HelloController extends AbstractLogs {
             welcomeText.setText("Wetter in " + lastWeatherData.city());
             updateTemperatureDisplay(lastWeatherData.temperature());
             humidity.setText(lastWeatherData.humidity() + "%");
+
             if (humidityBox != null) humidityBox.setVisible(true);
-
             if (clothingTip != null) clothingTip.setText(lastWeatherData.getClothingTip());
-
-            if (detailsButton != null) {
-                detailsButton.setDisable(false);
-            }
+            if (detailsButton != null) detailsButton.setDisable(false);
 
             checkUserWarning(lastWeatherData.temperature());
-            historyService.saveToHistory(lastWeatherData);
 
+            historyService.saveToHistory(lastWeatherData);
         } else {
             welcomeText.setText("Ungültige Daten empfangen.");
-        }
-    }
-
-    private void checkUserWarning(double temp) {
-        if (temp > 30.0) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Hitzewarnung");
-            alert.setHeaderText("Achtung: Sehr hohe Temperaturen!");
-            alert.setContentText("Es sind über 30°C. Trinken Sie genug Wasser.");
-            alert.show();
-        } else if (temp < -5.0) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Kältewarnung");
-            alert.setHeaderText("Achtung: Frostgefahr!");
-            alert.setContentText("Es ist extrem kalt. Achten Sie auf Glatteis.");
-            alert.show();
         }
     }
 
@@ -299,66 +160,65 @@ public class HelloController extends AbstractLogs {
         String[] parts = response.split("\\|");
 
         if (parts.length >= 4 && parts[0].equals("OK")) {
-            String city = parts[1];
-            double temp = Double.parseDouble(parts[2]);
-            int hum = Integer.parseInt(parts[3]);
+            try {
+                String city = parts[1];
+                double temp = Double.parseDouble(parts[2]);
+                int hum = Integer.parseInt(parts[3]);
 
-            double apparentTemp = parts.length > 4 ? Double.parseDouble(parts[4]) : temp;
-            int weatherCode = parts.length > 5 ? Integer.parseInt(parts[5]) : 0;
-            double windSpeed = parts.length > 6 ? Double.parseDouble(parts[6]) : 0;
-            double windGusts = parts.length > 7 ? Double.parseDouble(parts[7]) : 0;
-            int cloudCover = parts.length > 8 ? Integer.parseInt(parts[8]) : 0;
-            double dewPoint = parts.length > 9 ? Double.parseDouble(parts[9]) : 0;
+                double apparentTemp = parts.length > 4 ? Double.parseDouble(parts[4]) : temp;
+                int weatherCode = parts.length > 5 ? Integer.parseInt(parts[5]) : 0;
+                double windSpeed = parts.length > 6 ? Double.parseDouble(parts[6]) : 0;
+                double windGusts = parts.length > 7 ? Double.parseDouble(parts[7]) : 0;
+                int cloudCover = parts.length > 8 ? Integer.parseInt(parts[8]) : 0;
+                double dewPoint = parts.length > 9 ? Double.parseDouble(parts[9]) : 0;
 
-            return new WeatherData(city, temp, hum, windSpeed, cloudCover, dewPoint,
-                    apparentTemp, weatherCode, windGusts);
+                return new WeatherData(city, temp, hum, windSpeed, cloudCover, dewPoint,
+                        apparentTemp, weatherCode, windGusts);
+            } catch (Exception e) {
+                log("Parse Fehler: " + e.getMessage());
+                return null;
+            }
         } else {
             return null;
         }
     }
 
+    private void checkUserWarning(double temp) {
+        if (temp > 30.0) showWarning("Hitzewarnung", "Über 30°C! Viel trinken.");
+        else if (temp < -5.0) showWarning("Kältewarnung", "Unter -5°C! Glatteisgefahr.");
+    }
+
+    private void showWarning(String title, String msg) {
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.show();
+    }
+
+
     @FXML
     protected void onShowHistoryClick() {
-        historyArea.setText("Lade History...");
-
+        historyArea.setText("Lade Historie...");
         Task<List<String>> historyTask = new Task<>() {
             @Override
             protected List<String> call() throws Exception {
                 return historyService.loadHistory();
             }
         };
-
-        historyTask.setOnSucceeded(e -> {
-            List<String> history = historyTask.getValue();
-            historyArea.setText(String.join("\n", history));
-        });
-
-        historyTask.setOnFailed(e -> {
-            historyArea.setText("Fehler beim Laden der History.");
-            log("Fehler beim Laden der History: " + historyTask.getException());
-        });
-
+        historyTask.setOnSucceeded(e -> historyArea.setText(String.join("\n", historyTask.getValue())));
+        historyTask.setOnFailed(e -> historyArea.setText("Fehler beim Laden."));
         new Thread(historyTask).start();
     }
 
     @FXML
     protected void onExportHistoryCsv() {
-        String historyFile = org.example.weatherscout.utils.Config.getHistoryFile();
-        File input = new File(historyFile);
-        File parent = input.getAbsoluteFile().getParentFile();
-        File output = (parent != null) ? new File(parent, "weather_history.csv") : new File("weather_history.csv");
-
-        if (!input.exists()) {
-            welcomeText.setText("Keine Historie zum Exportieren.");
-            return;
-        }
-
+        File output = new File("weather_history.csv");
         try {
             historyService.exportToCsv(output);
-            welcomeText.setText("Export erfolgreich: " + output.getName());
+            welcomeText.setText("Exportiert: " + output.getName());
         } catch (IOException e) {
-            welcomeText.setText("Fehler beim Export: " + e.getMessage());
-            log("Export-Fehler: " + e.getMessage());
+            welcomeText.setText("Fehler: " + e.getMessage());
         }
     }
 
@@ -372,57 +232,34 @@ public class HelloController extends AbstractLogs {
     protected void onUnitToggle() {
         isFahrenheit = unitToggle.isSelected();
         unitToggle.setText(isFahrenheit ? "°F" : "°C");
-
-        if (lastWeatherData != null) {
-            updateTemperatureDisplay(lastWeatherData.temperature());
-        }
-
+        if (lastWeatherData != null) updateTemperatureDisplay(lastWeatherData.temperature());
         Config.saveSetting("app.unit", isFahrenheit ? "F" : "C");
     }
 
     @FXML
     protected void onDetailsClick() {
-        if (lastWeatherData == null) {
-            welcomeText.setText("Bitte erst eine Stadt suchen!");
-            return;
-        }
-
-        String details = buildDetailsString();
-        historyArea.setText(details);
+        if (lastWeatherData != null) historyArea.setText(buildDetailsString());
     }
 
     private String buildDetailsString() {
-        double tempDisplay = isFahrenheit
-            ? lastWeatherData.temperature() * 9 / 5 + 32
-            : lastWeatherData.temperature();
-        String tempUnit = isFahrenheit ? "°F" : "°C";
+        double temp = lastWeatherData.temperature();
+        double feel = lastWeatherData.apparentTemp();
+        String unit = "°C";
 
-        double apparentTempDisplay = isFahrenheit
-            ? lastWeatherData.apparentTemp() * 9 / 5 + 32
-            : lastWeatherData.apparentTemp();
-
-        double dewPointDisplay = isFahrenheit
-            ? lastWeatherData.dewPoint() * 9 / 5 + 32
-            : lastWeatherData.dewPoint();
-
-        return "Stadt: " + lastWeatherData.city() + "\n" +
-               "Wetter: " + lastWeatherData.getWeatherDescription() + "\n" +
-               "Temperatur: " + String.format("%.1f", tempDisplay) + " " + tempUnit + "\n" +
-               "Gefühlt wie: " + String.format("%.1f", apparentTempDisplay) + " " + tempUnit + "\n" +
-               "Luftfeuchtigkeit: " + lastWeatherData.humidity() + "%\n" +
-               "Taupunkt: " + String.format("%.1f", dewPointDisplay) + " " + tempUnit + "\n" +
-               "Wolkenbedeckung: " + lastWeatherData.getCloudDescription() + "\n" +
-               "Windgeschwindigkeit: " + String.format("%.1f", lastWeatherData.windSpeed()) + " km/h (" + lastWeatherData.getWindDescription() + ")\n" +
-               "Windböen: " + String.format("%.1f", lastWeatherData.windGusts()) + " km/h";
+        if (isFahrenheit) {
+            temp = temp * 9 / 5 + 32;
+            feel = feel * 9 / 5 + 32;
+            unit = "°F";
+        }
+        return String.format("Stadt: %s\nWetter: %s\nTemp: %.1f %s\nGefühlt: %.1f %s",
+                lastWeatherData.city(), lastWeatherData.getWeatherDescription(), temp, unit, feel, unit);
     }
 
     private void updateTemperatureDisplay(double tempCelsius) {
         if (isFahrenheit) {
-            double tempF = tempCelsius * 9 / 5 + 32;
-            temperature.setText(String.format("%.1f °F", tempF));
+            temperature.setText(String.format("%.1f °F", tempCelsius * 9 / 5 + 32));
         } else {
             temperature.setText(String.format("%.1f °C", tempCelsius));
         }
     }
 }
-
