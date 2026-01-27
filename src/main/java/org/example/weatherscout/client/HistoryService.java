@@ -82,8 +82,7 @@ public class HistoryService {
         }
     }
 
-    // Exportiert die gespeicherte Historie in eine CSV-Datei. Werfe IOException an den Aufrufer,
-    // damit die UI geeignete Meldungen anzeigen kann.
+    // Export to CSV
     public void exportToCsv(File output) throws IOException {
         File input = new File(historyFile);
         File parent = input.getAbsoluteFile().getParentFile();
@@ -96,7 +95,7 @@ public class HistoryService {
              FileWriter fw = new FileWriter(output);
              BufferedWriter bw = new BufferedWriter(fw)) {
 
-            // Header (einfach generisch)
+
             bw.write("Timestamp;Stadt;Wetter;Temperatur;Gefuehlt;Luftfeuchtigkeit;Taupunkt;Wolkenbedeckung;Windgeschwindigkeit;Windboeen");
             bw.newLine();
 
@@ -105,7 +104,7 @@ public class HistoryService {
                 String[] parts = line.split("\\s\\|\\s");
                 List<String> columns = new ArrayList<>();
 
-                // erste Spalte: timestamp
+                // timestamp
                 String ts = "";
                 if (parts.length > 0 && parts[0] != null) {
                     String raw = parts[0].trim();
@@ -124,16 +123,17 @@ public class HistoryService {
                     String p = parts[i];
                     int idx = p.indexOf(":");
                     String value = (idx >= 0 && idx + 1 < p.length()) ? p.substring(idx + 1).trim() : p.trim();
-                    // Spezielle Behandlung je Spalte:
+
+                    // special handling fields
                     // i==3 -> Temperatur, i==4 -> Gefuehlt, i==5 -> Luftfeuchtigkeit, i==6 -> Taupunkt
-                    // Konvertiere Dezimalkommas zu Dezimalpunkten, z.B. "3,3" -> "3.3"
+                    // Komma zu Punkt
                     value = value.replaceAll("(\\d),(\\d)", "$1.$2");
                     if (i == 5) {
-                        // Luftfeuchte: behalte das Prozentzeichen (falls vorhanden)
+
                         value = value.replace("°C", "").trim();
                         columns.add(csvEscape(value));
                     } else if (i == 3 || i == 4 || i == 6) {
-                        // Temperatur/Gefuehlt/Taupunkt: entferne Einheiten und schreibe als reiner Text
+
                         value = value.replace("°C", "").replace("%", "").trim();
                         if (value.isEmpty()) {
                             columns.add(csvEscape(""));
@@ -149,7 +149,7 @@ public class HistoryService {
                     }
                 }
 
-                // Falls weniger Spalten vorhanden sind, fülle leere
+                // Filling empty columns
                 while (columns.size() < 11) columns.add("");
 
                 bw.write(String.join(";", columns));
