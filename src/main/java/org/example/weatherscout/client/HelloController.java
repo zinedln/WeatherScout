@@ -100,7 +100,6 @@ public class HelloController extends AbstractLogs {
         }
 
         cityInput.setStyle("");
-        // ---------------------------------------------
 
         // GUI Reset
         welcomeText.setText("Lade Daten...");
@@ -253,17 +252,28 @@ public class HelloController extends AbstractLogs {
     }
 
     private String buildDetailsString() {
-        double temp = lastWeatherData.temperature();
-        double feel = lastWeatherData.apparentTemp();
-        String unit = "°C";
+        double tempDisplay = isFahrenheit
+            ? lastWeatherData.temperature() * 9 / 5 + 32
+            : lastWeatherData.temperature();
+        String tempUnit = isFahrenheit ? "°F" : "°C";
 
-        if (isFahrenheit) {
-            temp = temp * 9 / 5 + 32;
-            feel = feel * 9 / 5 + 32;
-            unit = "°F";
-        }
-        return String.format("Stadt: %s\nWetter: %s\nTemp: %.1f %s\nGefühlt: %.1f %s",
-                lastWeatherData.city(), lastWeatherData.getWeatherDescription(), temp, unit, feel, unit);
+        double apparentTempDisplay = isFahrenheit
+            ? lastWeatherData.apparentTemp() * 9 / 5 + 32
+            : lastWeatherData.apparentTemp();
+
+        double dewPointDisplay = isFahrenheit
+            ? lastWeatherData.dewPoint() * 9 / 5 + 32
+            : lastWeatherData.dewPoint();
+
+        return "Stadt: " + lastWeatherData.city() + "\n" +
+               "Wetter: " + lastWeatherData.getWeatherDescription() + "\n" +
+               "Temperatur: " + String.format("%.1f", tempDisplay) + " " + tempUnit + "\n" +
+               "Gefühlt wie: " + String.format("%.1f", apparentTempDisplay) + " " + tempUnit + "\n" +
+               "Luftfeuchtigkeit: " + lastWeatherData.humidity() + "%\n" +
+               "Taupunkt: " + String.format("%.1f", dewPointDisplay) + " " + tempUnit + "\n" +
+               "Wolkenbedeckung: " + lastWeatherData.getCloudDescription() + "\n" +
+               "Windgeschwindigkeit: " + String.format("%.1f", lastWeatherData.windSpeed()) + " km/h (" + lastWeatherData.getWindDescription() + ")\n" +
+               "Windböen: " + String.format("%.1f", lastWeatherData.windGusts()) + " km/h";
     }
 
     private void updateTemperatureDisplay(double tempCelsius) {
