@@ -1,2 +1,0 @@
-27.01.2026 17:21 | Stadt: Wien | Wetter: Nebel | Temperatur: 0,4°C | Gefühlt wie: -3,0°C | Luftfeuchtigkeit: 94% | Taupunkt: -0,4°C | Wolkenbedeckung: Bedeckt | Windgeschwindigkeit: 8,2 km/h (Mäßiger Wind) | Windböen: 19,8 km/h
-27.01.2026 17:21 | Stadt: Istanbul | Wetter: Bedeckt | Temperatur: 12,0°C | Gefühlt wie: 11,0°C | Luftfeuchtigkeit: 80% | Taupunkt: 8,6°C | Wolkenbedeckung: Bedeckt | Windgeschwindigkeit: 3,8 km/h (Leichter Wind) | Windböen: 6,5 km/h
