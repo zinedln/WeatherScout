@@ -156,18 +156,3 @@ public class HistoryService {
                 bw.newLine();
             }
 
-            bw.flush();
-        }
-    }
-
-    // Hilfsmethode: um CSV-Felder sicher zu escapen
-    private String csvEscape(String s) {
-        if (s == null) return "";
-        String value = s.replace("\"", "\"\"");
-        // Felder quote, wenn sie Semikolon, Anführungszeichen oder Zeilenumbruch enthalten
-        if (value.contains(";") || value.contains("\"") || value.contains("\n")) {
-            return "\"" + value + "\"";
-        }
-        return value;
-    }
-}
