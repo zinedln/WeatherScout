@@ -85,7 +85,7 @@ public class HistoryService {
     // Export to CSV
     public void exportToCsv(File output) throws IOException {
         File input = new File(historyFile);
-        File parent = input.getAbsoluteFile().getParentFile();
+
 
         if (!input.exists()) {
             throw new FileNotFoundException("Keine Historie zum Exportieren.");
