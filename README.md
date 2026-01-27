@@ -21,8 +21,14 @@ Eine JavaFX-Anwendung zur Abfrage von Wetterdaten mit TCP-Client/Server-Architek
 | **NTH2** | Benutzerdefinierte Wetterwarnungen | Ja |
 | **NTH3** | Export der Historie als CSV | Ja |
 | **OK1** | Eigener TCP-Server | Ja |
-| **OK2** | Automatische Aktualisierung mit Timer | Nein |
+| **OK2** | Automatische Aktualisierung mit Timer* | Nein |
 | **OK3** | Persistente Benutzereinstellungen | Ja |
+
+** Wir haben uns gegen einen Timer entschieden, weil unser Programm als gezieltes Suchwerkzeug konzipiert ist. Der Nutzer möchte das aktuelle Wetter für eine *bestimmte* Stadt zu einem bestimmten Zeitpunkt wissen. Eine automatische Aktualisierung einer alten Suche nach mehreren Stunden würde nur unnötig Ressourcen verbrauchen, ohne einen Mehrwert zu bieten. Stattdessen haben wir unsere Energie in Features wie den ThemeManager gesteckt, die die Personalisierung und die User Experience direkt verbessern.
+
+
+
+
 
 ## Projektstruktur
 
